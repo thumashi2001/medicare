@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   useJoin,
   useRemoteUsers,
@@ -6,7 +6,16 @@ import {
   LocalVideoTrack,
 } from "agora-rtc-react";
 
-const LiveCall = ({ channelName, onLeave, localCameraTrack }) => {
+const LiveCall = ({
+  channelName,
+  onLeave,
+  localCameraTrack,
+  localMicrophoneTrack,
+  micOn,
+  setMicOn,
+  videoOn,
+  setVideoOn,
+}) => {
   const remoteUsers = useRemoteUsers();
 
   // JOIN THE CHANNEL
@@ -15,6 +24,21 @@ const LiveCall = ({ channelName, onLeave, localCameraTrack }) => {
     channel: channelName,
     token: null,
   });
+
+  useEffect(() => {
+    if (localCameraTrack) localCameraTrack.setEnabled(videoOn);
+    if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(micOn);
+  }, []);
+
+  const toggleMic = () => {
+    localMicrophoneTrack.setEnabled(!micOn);
+    setMicOn(!micOn);
+  };
+
+  const toggleVideo = () => {
+    localCameraTrack.setEnabled(!videoOn);
+    setVideoOn(!videoOn);
+  };
 
   return (
     <div className="call-container">
@@ -65,20 +89,27 @@ const LiveCall = ({ channelName, onLeave, localCameraTrack }) => {
         </div>
       </div>
 
-      <button
-        onClick={onLeave}
+      <div
         style={{
           marginTop: "20px",
-          padding: "10px 20px",
-          background: "#dc3545",
-          color: "#fff",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          gap: "10px",
         }}
       >
-        Leave Consultation
-      </button>
+        <button onClick={toggleMic} style={{ padding: "10px 20px" }}>
+          {micOn ? "🎤 Mute" : "🔇 Unmute"}
+        </button>
+        <button onClick={toggleVideo} style={{ padding: "10px 20px" }}>
+          {videoOn ? "📷 Stop Video" : "🎥 Start Video"}
+        </button>
+        <button
+          onClick={onLeave}
+          style={{ padding: "10px 20px", background: "#dc3545", color: "#fff" }}
+        >
+          Leave Call
+        </button>
+      </div>
     </div>
   );
 };

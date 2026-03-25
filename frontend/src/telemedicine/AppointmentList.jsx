@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 const AppointmentList = () => {
   const navigate = useNavigate();
 
-  // Mock data - In a real app, this comes from your Appointment Service
+  // Mock data
   const myAppointments = [
     { id: "APP-9987", doctor: "Dr. Kamal Perera", time: "10:30 AM" },
     { id: "APP-5542", doctor: "Dr. Sarah Silva", time: "02:15 PM" },
