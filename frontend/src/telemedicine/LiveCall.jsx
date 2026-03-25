@@ -1,10 +1,5 @@
 import React, { useEffect } from "react";
-import {
-  useJoin,
-  useRemoteUsers,
-  RemoteUser,
-  LocalVideoTrack,
-} from "agora-rtc-react";
+import { useRemoteUsers, RemoteUser, LocalVideoTrack } from "agora-rtc-react";
 
 const LiveCall = ({
   channelName,
@@ -15,43 +10,42 @@ const LiveCall = ({
   setMicOn,
   videoOn,
   setVideoOn,
-  client, // client passed from parent
+  client, // make sure client is passed from TelemedicineSession
 }) => {
   const remoteUsers = useRemoteUsers();
 
-  // JOIN THE CHANNEL
-  useJoin({
-    appid: "7fdb2f9971a44340b66e10f9712e9493",
-    channel: channelName,
-    token: null,
-  });
-
-  // Enable local tracks and publish them AFTER client joins
+  // Join and publish tracks safely
   useEffect(() => {
-    const setupTracks = async () => {
+    const joinAndPublish = async () => {
       if (!localCameraTrack || !localMicrophoneTrack) return;
 
-      const onJoined = async () => {
-        try {
-          localCameraTrack.setEnabled(videoOn);
-          localMicrophoneTrack.setEnabled(micOn);
-          await client.publish([localCameraTrack, localMicrophoneTrack]);
-          console.log("Tracks published successfully");
-        } catch (err) {
-          console.error("Failed to publish tracks:", err);
-        }
-      };
+      try {
+        // Join channel (if not already joined)
+        await client.join(
+          "7fdb2f9971a44340b66e10f9712e9493",
+          channelName,
+          null,
+          null,
+        );
 
-      // Listen for client connection state change
-      client.on("connection-state-change", (curState) => {
-        if (curState === "CONNECTED") {
-          onJoined();
-        }
-      });
+        // Enable local tracks based on current state
+        localCameraTrack.setEnabled(videoOn);
+        localMicrophoneTrack.setEnabled(micOn);
+
+        // Publish tracks for remote users
+        await client.publish([localCameraTrack, localMicrophoneTrack]);
+        console.log("Tracks published successfully");
+      } catch (err) {
+        console.error("Failed to join/publish:", err);
+      }
     };
 
-    setupTracks();
-  }, [localCameraTrack, localMicrophoneTrack, client, micOn, videoOn]);
+    joinAndPublish();
+  }, [
+    localCameraTrack,
+    localMicrophoneTrack,
+  
+  ]);
 
   const toggleMic = () => {
     if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(!micOn);
@@ -78,11 +72,13 @@ const LiveCall = ({
           }}
         >
           <p style={{ margin: "5px" }}>You</p>
-          <LocalVideoTrack
-            track={localCameraTrack}
-            play={true}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          {localCameraTrack && (
+            <LocalVideoTrack
+              track={localCameraTrack}
+              play="true"
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          )}
         </div>
 
         {/* Remote Video Box */}
@@ -100,7 +96,7 @@ const LiveCall = ({
             <RemoteUser
               key={user.uid}
               user={user}
-              play={true}
+              play="true"
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ))}
