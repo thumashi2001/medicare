@@ -15,6 +15,7 @@ const LiveCall = ({
   setMicOn,
   videoOn,
   setVideoOn,
+  client, // client passed from parent
 }) => {
   const remoteUsers = useRemoteUsers();
 
@@ -25,18 +26,40 @@ const LiveCall = ({
     token: null,
   });
 
+  // Enable local tracks and publish them AFTER client joins
   useEffect(() => {
-    if (localCameraTrack) localCameraTrack.setEnabled(videoOn);
-    if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(micOn);
-  }, []);
+    const setupTracks = async () => {
+      if (!localCameraTrack || !localMicrophoneTrack) return;
+
+      const onJoined = async () => {
+        try {
+          localCameraTrack.setEnabled(videoOn);
+          localMicrophoneTrack.setEnabled(micOn);
+          await client.publish([localCameraTrack, localMicrophoneTrack]);
+          console.log("Tracks published successfully");
+        } catch (err) {
+          console.error("Failed to publish tracks:", err);
+        }
+      };
+
+      // Listen for client connection state change
+      client.on("connection-state-change", (curState) => {
+        if (curState === "CONNECTED") {
+          onJoined();
+        }
+      });
+    };
+
+    setupTracks();
+  }, [localCameraTrack, localMicrophoneTrack, client, micOn, videoOn]);
 
   const toggleMic = () => {
-    localMicrophoneTrack.setEnabled(!micOn);
+    if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(!micOn);
     setMicOn(!micOn);
   };
 
   const toggleVideo = () => {
-    localCameraTrack.setEnabled(!videoOn);
+    if (localCameraTrack) localCameraTrack.setEnabled(!videoOn);
     setVideoOn(!videoOn);
   };
 
@@ -57,7 +80,7 @@ const LiveCall = ({
           <p style={{ margin: "5px" }}>You</p>
           <LocalVideoTrack
             track={localCameraTrack}
-            play
+            play={true}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
           />
         </div>
@@ -77,7 +100,7 @@ const LiveCall = ({
             <RemoteUser
               key={user.uid}
               user={user}
-              play
+              play={true}
               style={{ width: "100%", height: "100%", objectFit: "cover" }}
             />
           ))}

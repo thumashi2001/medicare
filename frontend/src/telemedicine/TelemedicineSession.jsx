@@ -25,20 +25,20 @@ const TelemedicineSession = () => {
   const { localMicrophoneTrack } = useLocalMicrophoneTrack();
 
   return (
-    <div style={{ padding: "20px", textAlign: "center" }}>
-      <h1>Consultation Session: {appointmentId}</h1>
+    <AgoraRTCProvider client={client}>
+      <div style={{ padding: "20px", textAlign: "center" }}>
+        <h1>Consultation Session: {appointmentId}</h1>
 
-      {!inCall ? (
-        <WaitingRoom
-          localCameraTrack={localCameraTrack}
-          micOn={micOn}
-          setMicOn={setMicOn}
-          videoOn={videoOn}
-          setVideoOn={setVideoOn}
-          onEnter={() => setInCall(true)}
-        />
-      ) : (
-        <AgoraRTCProvider client={client}>
+        {!inCall ? (
+          <WaitingRoom
+            localCameraTrack={localCameraTrack}
+            micOn={micOn}
+            setMicOn={setMicOn}
+            videoOn={videoOn}
+            setVideoOn={setVideoOn}
+            onEnter={() => setInCall(true)}
+          />
+        ) : (
           <LiveCall
             channelName={appointmentId}
             onLeave={() => navigate("/appointments")}
@@ -48,10 +48,11 @@ const TelemedicineSession = () => {
             setMicOn={setMicOn}
             videoOn={videoOn}
             setVideoOn={setVideoOn}
+            client={client}
           />
-        </AgoraRTCProvider>
-      )}
-    </div>
+        )}
+      </div>
+    </AgoraRTCProvider>
   );
 };
 
