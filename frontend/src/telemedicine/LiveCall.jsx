@@ -41,11 +41,18 @@ const LiveCall = ({
     };
 
     joinAndPublish();
-  }, [
-    localCameraTrack,
-    localMicrophoneTrack,
-  
-  ]);
+
+    return () => {
+      const leaveChannel = async () => {
+        // Unpublish the tracks so others stop seeing/hearing you
+        await client.unpublish([localCameraTrack, localMicrophoneTrack]);
+        // Physically leave the Agora channel
+        await client.leave();
+        console.log("Left channel and unpublished tracks");
+      };
+      leaveChannel();
+    };
+  }, [localCameraTrack, localMicrophoneTrack]);
 
   const toggleMic = () => {
     if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(!micOn);
