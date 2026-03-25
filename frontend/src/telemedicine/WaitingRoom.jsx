@@ -11,7 +11,7 @@ const WaitingRoom = ({
 }) => {
   return (
     <div className="waiting-room">
-      <h3>Step B: Waiting Room</h3>
+      <h3>Waiting Room</h3>
       <p>Check your camera and microphone below.</p>
 
       <div
@@ -38,7 +38,7 @@ const WaitingRoom = ({
         )}
       </div>
 
-      {/* --- ADD THESE BUTTONS --- */}
+   
       <div
         style={{
           marginBottom: "20px",
