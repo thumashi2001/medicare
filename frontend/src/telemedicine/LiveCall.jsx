@@ -10,31 +10,26 @@ const LiveCall = ({
   setMicOn,
   videoOn,
   setVideoOn,
-  client, // make sure client is passed from TelemedicineSession
+  client, 
 }) => {
   const remoteUsers = useRemoteUsers();
 
-  // Join and publish tracks safely
   useEffect(() => {
     const joinAndPublish = async () => {
       if (!localCameraTrack || !localMicrophoneTrack) return;
 
       try {
-        // Join channel (if not already joined)
         await client.join(
           "7fdb2f9971a44340b66e10f9712e9493",
           channelName,
           null,
-          null,
+          null
         );
 
-        // Enable local tracks based on current state
         localCameraTrack.setEnabled(videoOn);
         localMicrophoneTrack.setEnabled(micOn);
 
-        // Publish tracks for remote users
         await client.publish([localCameraTrack, localMicrophoneTrack]);
-        console.log("Tracks published successfully");
       } catch (err) {
         console.error("Failed to join/publish:", err);
       }
@@ -44,15 +39,20 @@ const LiveCall = ({
 
     return () => {
       const leaveChannel = async () => {
-        // Unpublish the tracks so others stop seeing/hearing you
         await client.unpublish([localCameraTrack, localMicrophoneTrack]);
-        // Physically leave the Agora channel
         await client.leave();
-        console.log("Left channel and unpublished tracks");
+        if (localCameraTrack) {
+          localCameraTrack.stop();
+          localCameraTrack.close();
+        }
+        if (localMicrophoneTrack) {
+          localMicrophoneTrack.stop();
+          localMicrophoneTrack.close();
+        }
       };
       leaveChannel();
     };
-  }, [localCameraTrack, localMicrophoneTrack]);
+  }, [localCameraTrack, localMicrophoneTrack, channelName, client]);
 
   const toggleMic = () => {
     if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(!micOn);
@@ -65,9 +65,14 @@ const LiveCall = ({
   };
 
   return (
-    <div className="call-container">
+    <div className="call-container" style={{ width: "100%", padding: "20px" }}>
       <div
-        style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px" }}
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "20px",
+          width: "100%",
+        }}
       >
         {/* Local Video Box */}
         <div
@@ -76,15 +81,23 @@ const LiveCall = ({
             border: "2px solid #007bff",
             borderRadius: "10px",
             overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            background: "#000",
+            position: "relative",
           }}
         >
-          <p style={{ margin: "5px" }}>You</p>
+          <p style={{ margin: "5px", color: "#fff", zIndex: 10, position: "absolute" }}>You</p>
           {localCameraTrack && (
-            <LocalVideoTrack
-              track={localCameraTrack}
-              play="true"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
+            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+              <LocalVideoTrack
+                track={localCameraTrack}
+                play={true}
+                // THIS FIXES THE CROPPING:
+                videoPlayerConfig={{ fit: "contain" }} 
+                style={{ width: "100%", height: "100%" }}
+              />
+            </div>
           )}
         </div>
 
@@ -96,43 +109,42 @@ const LiveCall = ({
             background: "#333",
             borderRadius: "10px",
             overflow: "hidden",
+            display: "flex",
+            flexDirection: "column",
+            position: "relative",
           }}
         >
-          <p style={{ margin: "5px", color: "white" }}>Other Participant</p>
-          {remoteUsers.map((user) => (
-            <RemoteUser
-              key={user.uid}
-              user={user}
-              play="true"
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            />
-          ))}
-          {remoteUsers.length === 0 && (
-            <p style={{ color: "white", marginTop: "150px" }}>
-              Waiting for other party to join...
-            </p>
-          )}
+          <p style={{ margin: "5px", color: "white", zIndex: 10, position: "absolute" }}>
+            Other Participant
+          </p>
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+            {remoteUsers.map((user) => (
+              <RemoteUser
+                key={user.uid}
+                user={user}
+                play={true}
+                // APPLY TO REMOTE AS WELL:
+                videoPlayerConfig={{ fit: "contain" }}
+                style={{ width: "100%", height: "100%" }}
+              />
+            ))}
+            {remoteUsers.length === 0 && (
+              <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
+                <p style={{ color: "white" }}>Waiting for other party to join...</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      <div
-        style={{
-          marginTop: "20px",
-          display: "flex",
-          justifyContent: "center",
-          gap: "10px",
-        }}
-      >
+      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", gap: "10px" }}>
         <button onClick={toggleMic} style={{ padding: "10px 20px" }}>
           {micOn ? "🎤 Mute" : "🔇 Unmute"}
         </button>
         <button onClick={toggleVideo} style={{ padding: "10px 20px" }}>
           {videoOn ? "📷 Stop Video" : "🎥 Start Video"}
         </button>
-        <button
-          onClick={onLeave}
-          style={{ padding: "10px 20px", background: "#dc3545", color: "#fff" }}
-        >
+        <button onClick={onLeave} style={{ padding: "10px 20px", background: "#dc3545", color: "#fff" }}>
           Leave Call
         </button>
       </div>
