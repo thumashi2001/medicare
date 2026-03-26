@@ -13,6 +13,8 @@ app.use(express.json());
 
 app.use("/api/auth", require("./src/routes/authRoutes"));
 
+app.use("/api/protected", require("./src/routes/protectedRoutes"));
+
 const PORT = process.env.PORT || 5001;
 
 app.listen(PORT, () => {
