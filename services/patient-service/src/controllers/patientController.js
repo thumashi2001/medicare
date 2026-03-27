@@ -36,3 +36,41 @@ exports.getProfile = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+//Upload Report
+exports.uploadReport = async (req, res) => {
+    try {
+        const patient = await Patient.findOne({ userId: req.user.id });
+
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        patient.reports.push({
+            filePath: req.file.path
+        });
+
+        await patient.save();
+        
+        res.json({ message: "Report uploaded successfully", file: req.file.path });
+    } catch (error) {
+        console.error("UPLOAD ERROR:", error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//Get Reports
+exports.getReports = async (req, res) => {
+    try {
+        const patient = await Patient.findOne({ userId: req.user.id });
+
+        if (!patient) {
+            return res.status(404).json({ message: "Patient not found" });
+        }
+
+        res.json(patient.reports);
+    } catch (error) {
+        console.error("GET REPORTS ERROR:", error);
+        res.status(500).json({ error: error.message });
+    }
+};

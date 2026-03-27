@@ -13,6 +13,8 @@ app.use(express.json());
 
 app.use("/api/patients", require("./src/routes/patientRoutes"));
 
+app.use("/uploads", express.static("uploads"));
+
 const PORT = process.env.PORT || 5002;
 
 app.listen(PORT, () => {

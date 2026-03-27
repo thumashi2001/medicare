@@ -9,7 +9,16 @@ const patientSchema = new mongoose.Schema({
     age: Number,
     gender: String,
     phone: String,
-    address: String
+    address: String,
+    reports: [
+        {
+            filePath: String,
+            uploadedAt: {
+                type: Date,
+                default: Date.now
+            }
+        }
+    ]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Patient", patientSchema);
