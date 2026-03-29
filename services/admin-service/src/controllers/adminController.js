@@ -1,11 +1,21 @@
+const axios = require("axios");
+
 exports.getUsers = async (req, res) => {
-    res.json({
-        message: "List of users (mock data)",
-        users: [
-            { id: 1, name: "User1" },
-            { id: 2, name: "User2" }
-        ]
-    });
+    try {
+        const response = await axios.get(
+            "http://localhost:5001/api/auth/users",
+            {
+                headers: {
+                    Authorization: req.headers.authorization
+                }
+            }
+        );
+
+        res.json(response.data);
+    } catch (error) {
+        console.error("ADMIN ERROR:", error.message);
+        res.status(500).json({ message: "Failed to fetch users" });
+    }
 };
 
 //delete user
