@@ -20,9 +20,21 @@ exports.getUsers = async (req, res) => {
 
 //delete user
 exports.deleteUser = async (req, res) => {
-    const userId = req.params.id;
+    try {
+        const response = await axios.delete(
+            `http://localhost:5001/api/auth/users/${req.params.id}`,
+            {
+                headers: {
+                    Authorization: req.headers.authorization
+                }
+            }
+        );
 
-    res.json({ message: `User ${userId} deleted (mock)` });
+        res.json(response.data);
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: "Failed to delete user" });
+    }
 };
 
 //verify doctor
