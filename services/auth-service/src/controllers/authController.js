@@ -79,3 +79,23 @@ exports.deleteUser = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+//verify doctors
+exports.verifyDoctor = async (req, res) => {
+    try {
+        const doctorId = req.params.id;
+
+        const doctor = await User.findById(doctorId);
+
+        if (!doctor || doctor.role !== "doctor") {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+
+        doctor.isVerified = true;
+        await doctor.save();
+
+        res.json({ message: "Doctor verified successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};

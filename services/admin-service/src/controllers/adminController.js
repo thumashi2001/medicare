@@ -39,7 +39,19 @@ exports.deleteUser = async (req, res) => {
 
 //verify doctor
 exports.verifyDoctor = async (req, res) => {
-    const doctorId = req.params.id;
+    try {
+        const response = await axios.put(
+            `http://localhost:5001/api/auth/verify-doctor/${req.params.id}`,
+            {},
+            {
+                headers: {
+                    Authorization: req.headers.authorization
+                }
+            }
+        );
 
-    res.json({ message: `Doctor ${doctorId} verified` });
+        res.json(response.data);
+    } catch (error) {
+        res.status(500).json({ message: "Failed to verify doctor" });
+    }
 };
