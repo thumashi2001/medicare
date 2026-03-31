@@ -57,11 +57,44 @@ exports.login = async (req, res) => {
     }
 };
 
-//get all users
+//Get users
 exports.getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password");
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//Delete users
+exports.deleteUser = async (req, res) => {
     try {
-        const users = await User.find().select("-password");
-        res.json(users);
+        const userId = req.params.id;
+
+        await User.findByIdAndDelete(userId);
+
+        res.json({ message: "User deleted successfully" });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+//verify doctors
+exports.verifyDoctor = async (req, res) => {
+    try {
+        const doctorId = req.params.id;
+
+        const doctor = await User.findById(doctorId);
+
+        if (!doctor || doctor.role !== "doctor") {
+            return res.status(404).json({ message: "Doctor not found" });
+        }
+
+        doctor.isVerified = true;
+        await doctor.save();
+
+        res.json({ message: "Doctor verified successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
