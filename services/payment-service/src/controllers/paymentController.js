@@ -5,11 +5,33 @@ const PriceConfig = require("../models/PriceConfig");
 const generateMd5 = (string) =>
   crypto.createHash("md5").update(string).digest("hex").toUpperCase();
 
+function requireEnv(name) {
+  const value = process.env[name];
+  if (!value || !String(value).trim()) {
+    throw new Error(`Missing required env var: ${name}`);
+  }
+  return String(value).trim();
+}
+
+function parseBoolEnv(name, defaultValue = false) {
+  const raw = process.env[name];
+  if (raw == null) return defaultValue;
+  const normalized = String(raw).trim().toLowerCase();
+  return ["1", "true", "yes", "y", "on"].includes(normalized);
+}
+
 // USER: Initiate Payment
 exports.initiatePayment = async (req, res) => {
   const { appointmentId, patientUsername } = req.body;
 
   try {
+    if (!appointmentId || !String(appointmentId).trim()) {
+      return res.status(400).json({ error: "appointmentId is required" });
+    }
+    if (!patientUsername || !String(patientUsername).trim()) {
+      return res.status(400).json({ error: "patientUsername is required" });
+    }
+
     const config = await PriceConfig.findOne({});
     if (!config) {
       return res.status(400).json({ msg: "Price not set by Admin" });
@@ -29,25 +51,34 @@ exports.initiatePayment = async (req, res) => {
       { upsert: true },
     );
 
-    const hashedSecret = generateMd5(process.env.PAYHERE_SECRET);
+    const merchantId = requireEnv("PAYHERE_MERCHANT_ID");
+    const secret = requireEnv("PAYHERE_SECRET");
+    const hashedSecret = generateMd5(secret);
 
     const hash = generateMd5(
-      process.env.PAYHERE_MERCHANT_ID +
-        appointmentId +
-        amount +
-        currency +
-        hashedSecret,
+      merchantId + appointmentId + amount + currency + hashedSecret,
     );
 
+    const sandbox = parseBoolEnv("PAYHERE_SANDBOX", true);
+    // PayHere notify_url MUST be publicly reachable; keep it configurable.
+    const notifyUrl = process.env.PAYHERE_NOTIFY_URL
+      ? String(process.env.PAYHERE_NOTIFY_URL).trim()
+      : null;
+
     return res.status(200).json({
-      merchant_id: process.env.PAYHERE_MERCHANT_ID,
+      sandbox,
+      merchant_id: merchantId,
       order_id: appointmentId,
       amount, // MUST MATCH HASH EXACTLY
       currency,
       hash,
+      notify_url: notifyUrl,
     });
   } catch (error) {
-    return res.status(500).json({ error: "Initiation failed" });
+    console.error("initiatePayment error:", error?.message || error);
+    return res
+      .status(500)
+      .json({ error: "Initiation failed", detail: error?.message });
   }
 
   
@@ -66,7 +97,8 @@ exports.handleNotification = async (req, res) => {
 
   try {
     // 1. Re-enable security: Verify the signature
-    const hashedSecret = generateMd5(process.env.PAYHERE_SECRET);
+    const secret = requireEnv("PAYHERE_SECRET");
+    const hashedSecret = generateMd5(secret);
     const localSig = generateMd5(
       merchant_id +
         order_id +

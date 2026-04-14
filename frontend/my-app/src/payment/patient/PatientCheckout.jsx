@@ -8,11 +8,15 @@ const PatientCheckout = ({ appointmentId, patientData }) => {
   // 🛡️ SELF-LOADING SDK LOGIC
   useEffect(() => {
     if (typeof window.payhere === "undefined") {
-      const script = document.createElement("script");
-      script.src = "https://www.payhere.lk/lib/payhere.js";
-      script.type = "text/javascript";
-      script.async = true;
-      document.head.appendChild(script);
+      // `index.html` already loads PayHere; this is a safe fallback.
+      if (!document.querySelector('script[data-payhere-sdk="true"]')) {
+        const script = document.createElement("script");
+        script.src = "https://www.payhere.lk/lib/payhere.js";
+        script.type = "text/javascript";
+        script.async = true;
+        script.setAttribute("data-payhere-sdk", "true");
+        document.head.appendChild(script);
+      }
     }
   }, []);
 
@@ -37,12 +41,19 @@ const PatientCheckout = ({ appointmentId, patientData }) => {
         },
       );
 
+      if (!data?.merchant_id || !data?.hash) {
+        throw new Error("Payment initiation failed: missing merchant_id/hash");
+      }
+
       const payment = {
-        sandbox: true,
+        sandbox: Boolean(data.sandbox),
         merchant_id: data.merchant_id,
         return_url: `${window.location.origin}/pay`,
         cancel_url: `${window.location.origin}/pay`,
-        notify_url: "https://your-ngrok-url.ngrok-free.app/api/payments/notify",
+        // Prefer backend-provided notify_url (must be publicly reachable for PayHere).
+        notify_url:
+          data.notify_url ||
+          "https://your-ngrok-url.ngrok-free.app/api/payments/notify",
         order_id: data.order_id,
         items: `Consultation: ${appointmentId}`,
         amount: String(data.amount), // FIXED
@@ -72,7 +83,13 @@ const PatientCheckout = ({ appointmentId, patientData }) => {
         setIsProcessing(false);
       };
     } catch (error) {
-      alert("Backend connection failed.");
+      console.error(error);
+      alert(
+        error?.response?.data?.detail ||
+          error?.response?.data?.error ||
+          error?.message ||
+          "Payment initiation failed.",
+      );
       setIsProcessing(false);
     }
   };
