@@ -3,9 +3,12 @@ const router = express.Router();
 const {
   initiatePayment,
   handleNotification,
+} = require("../controllers/paymentController");
+
+const {
   setGlobalPrice,
   getPaymentHistory,
-} = require("../controllers/paymentController");
+} = require("../controllers/adminController");
 
 // User routes
 router.post("/initiate", initiatePayment);
