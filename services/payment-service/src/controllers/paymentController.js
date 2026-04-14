@@ -8,38 +8,49 @@ const generateMd5 = (string) =>
 // USER: Initiate Payment
 exports.initiatePayment = async (req, res) => {
   const { appointmentId, patientUsername } = req.body;
+
   try {
     const config = await PriceConfig.findOne({});
-    if (!config) return res.status(400).json({ msg: "Price not set by Admin" });
+    if (!config) {
+      return res.status(400).json({ msg: "Price not set by Admin" });
+    }
 
-    const amountFormatted = parseFloat(config.amount).toFixed(2);
+    // FORCE STRICT FORMAT
+    const amount = Number(config.amount).toFixed(2);
     const currency = "LKR";
 
     await Payment.findOneAndUpdate(
       { appointmentId },
-      { patientUsername, amount: config.amount, status: "PENDING" },
+      {
+        patientUsername,
+        amount, // FIXED: store formatted string
+        status: "PENDING",
+      },
       { upsert: true },
     );
 
     const hashedSecret = generateMd5(process.env.PAYHERE_SECRET);
-    const mainHash = generateMd5(
+
+    const hash = generateMd5(
       process.env.PAYHERE_MERCHANT_ID +
         appointmentId +
-        amountFormatted +
+        amount +
         currency +
         hashedSecret,
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       merchant_id: process.env.PAYHERE_MERCHANT_ID,
       order_id: appointmentId,
-      amount: amountFormatted,
+      amount, // MUST MATCH HASH EXACTLY
       currency,
-      hash: mainHash,
+      hash,
     });
   } catch (error) {
-    res.status(500).json({ error: "Initiation failed" });
+    return res.status(500).json({ error: "Initiation failed" });
   }
+
+  
 };
 
 // PAYHERE: Webhook Notification
@@ -57,17 +68,19 @@ exports.handleNotification = async (req, res) => {
     // 1. Re-enable security: Verify the signature
     const hashedSecret = generateMd5(process.env.PAYHERE_SECRET);
     const localSig = generateMd5(
-      merchant_id + 
-      order_id + 
-      payhere_amount + 
-      payhere_currency + 
-      status_code + 
-      hashedSecret
+      merchant_id +
+        order_id +
+        payhere_amount +
+        payhere_currency +
+        status_code +
+        hashedSecret,
     );
 
     // If the signatures don't match, someone is trying to fake a payment!
     if (localSig !== md5sig) {
-      console.warn(`⚠️ Security Alert: Invalid signature for Order ${order_id}`);
+      console.warn(
+        `⚠️ Security Alert: Invalid signature for Order ${order_id}`,
+      );
       return res.status(400).send("Invalid Signature");
     }
 
@@ -76,20 +89,21 @@ exports.handleNotification = async (req, res) => {
       await Payment.findOneAndUpdate(
         { appointmentId: order_id },
         { status: "SUCCESS", paidAt: Date.now() },
-        { new: true }
+        { new: true },
       );
-      
-      console.log(`✅ Payment Verified: Appointment ${order_id} is now SUCCESS`);
+
+      console.log(
+        `✅ Payment Verified: Appointment ${order_id} is now SUCCESS`,
+      );
       return res.status(200).send("OK"); // PayHere expects a 200 OK response
     } else {
       // If status is not 2, update it to FAILED
       await Payment.findOneAndUpdate(
         { appointmentId: order_id },
-        { status: "FAILED" }
+        { status: "FAILED" },
       );
       return res.status(200).send("Payment Failed Status Recorded");
     }
-
   } catch (error) {
     console.error("❌ Webhook Error:", error);
     res.status(500).send("Internal Server Error");
