@@ -10,12 +10,13 @@ export default function DoctorLayout() {
     navigate("/login");
   };
 
-  const navItems = [
+    const navItems = [
     { label: "Dashboard", to: "/doctor" },
     { label: "Profile", to: "/doctor/profile" },
     { label: "Availability", to: "/doctor/availability" },
     { label: "Prescriptions", to: "/doctor/prescriptions" },
-    { label: "Appointments", to: "/doctor/appointments" }
+    { label: "Appointments", to: "/doctor/appointments" },
+    { label: "Reports", to: "/doctor/reports" }
   ];
 
   return (

@@ -9,6 +9,7 @@ import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
 import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
 import PatientDashboard from "./pages/PatientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
+import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -61,6 +62,7 @@ export default function App() {
         <Route path="availability" element={<DoctorAvailabilityPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
         <Route path="appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
 
       <Route

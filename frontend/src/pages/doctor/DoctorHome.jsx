@@ -23,6 +23,11 @@ export default function DoctorHome() {
       title: "Appointment Requests",
       description: "View appointment requests and accept or reject them.",
       action: () => navigate("/doctor/appointments")
+    },
+    {
+      title: "Patient Reports",
+      description: "Review uploaded medical reports and patient documents.",
+      action: () => navigate("/doctor/reports")
     }
   ];
 
