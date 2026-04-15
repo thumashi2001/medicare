@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import AppLogo from "../components/AppLogo";
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ export default function AdminDashboard() {
   return (
     <div style={styles.page}>
       <div style={styles.card}>
+        <AppLogo width={180} style={{ margin: "0 auto 16px" }} />
         <h1>Admin Dashboard</h1>
         <p>Login successful. Admin area can be built next.</p>
         <button onClick={handleLogout} style={styles.button}>
@@ -36,7 +38,9 @@ const styles = {
     borderRadius: "20px",
     padding: "32px",
     boxShadow: "0 12px 28px rgba(0,0,0,0.08)",
-    textAlign: "center"
+    textAlign: "center",
+    maxWidth: "500px",
+    width: "100%"
   },
   button: {
     marginTop: "16px",

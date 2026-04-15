@@ -5,23 +5,19 @@ import AppLogo from "../components/AppLogo";
 
 const AUTH_API = "http://localhost:5001";
 
-function getDashboardRoute(role) {
-  if (role === "doctor") return "/doctor";
-  if (role === "patient") return "/patient";
-  if (role === "admin") return "/admin";
-  return "/login";
-}
-
-export default function LoginPage() {
+export default function SignupPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
-    password: ""
+    password: "",
+    role: "patient"
   });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const isMobile = window.innerWidth <= 900;
 
@@ -29,7 +25,7 @@ export default function LoginPage() {
     return {
       page: {
         ...styles.page,
-        gridTemplateColumns: isMobile ? "1fr" : "1.1fr 0.9fr"
+        gridTemplateColumns: isMobile ? "1fr" : "1.05fr 0.95fr"
       },
       leftPanel: {
         ...styles.leftPanel,
@@ -42,19 +38,11 @@ export default function LoginPage() {
       },
       heading: {
         ...styles.heading,
-        fontSize: isMobile ? "34px" : "52px"
-      },
-      featureGrid: {
-        ...styles.featureGrid,
-        gridTemplateColumns: isMobile ? "1fr" : "repeat(2, minmax(0, 1fr))"
+        fontSize: isMobile ? "34px" : "50px"
       },
       card: {
         ...styles.card,
         padding: isMobile ? "26px 20px" : "34px"
-      },
-      title: {
-        ...styles.title,
-        fontSize: isMobile ? "28px" : "34px"
       }
     };
   }, [isMobile]);
@@ -70,20 +58,20 @@ export default function LoginPage() {
     event.preventDefault();
     setLoading(true);
     setError("");
+    setSuccess("");
 
     try {
-      const response = await axios.post(`${AUTH_API}/api/auth/login`, formData);
-
-      localStorage.setItem("token", response.data.token);
-      localStorage.setItem("role", response.data.role);
-
-      navigate(getDashboardRoute(response.data.role));
+      await axios.post(`${AUTH_API}/api/auth/register`, formData);
+      setSuccess("Account created successfully. You can log in now.");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
     } catch (err) {
-      console.error("Login error:", err);
+      console.error("Signup error:", err);
       setError(
         err.response?.data?.message ||
         err.message ||
-        "Login failed. Please try again."
+        "Signup failed. Please try again."
       );
     } finally {
       setLoading(false);
@@ -93,57 +81,44 @@ export default function LoginPage() {
   return (
     <div style={responsiveStyles.page}>
       <div style={responsiveStyles.leftPanel}>
-        <div style={styles.brandWrap}>
+        <div>
           <AppLogo width={220} />
         </div>
 
         <div style={styles.heroContent}>
-          <div style={styles.badge}>Care made simple</div>
-          <h1 style={responsiveStyles.heading}>Book care with confidence</h1>
+          <div style={styles.badge}>Quick Registration</div>
+          <h1 style={responsiveStyles.heading}>Create your account and get started</h1>
           <p style={styles.description}>
-            Find doctors, schedule appointments, consult online, and manage your health
-            from one trusted place.
+            Register as a patient or doctor to access appointments, records, prescriptions, and
+            platform services.
           </p>
-
-          <div style={responsiveStyles.featureGrid}>
-            <div style={styles.featureCard}>
-              <span style={styles.featureIcon}>🩺</span>
-              <span>Find trusted doctors</span>
-            </div>
-            <div style={styles.featureCard}>
-              <span style={styles.featureIcon}>📅</span>
-              <span>Book in seconds</span>
-            </div>
-            <div style={styles.featureCard}>
-              <span style={styles.featureIcon}>💊</span>
-              <span>Get digital prescriptions</span>
-            </div>
-            <div style={styles.featureCard}>
-              <span style={styles.featureIcon}>📁</span>
-              <span>Access records anytime</span>
-            </div>
-          </div>
         </div>
       </div>
 
       <div style={responsiveStyles.rightPanel}>
         <div style={responsiveStyles.card}>
-          <div style={styles.cardTop}>
-            <div style={styles.logoWrap}>
-            <img
-              src="/src/assets/logo/500sq-tp.png"
-              alt="MediCare Logo"
-              style={{ width: 70, height: 70, objectFit: "contain" }}
-            />
-          </div>
-            <div style={styles.miniBadge}>PATIENT | DOCTOR | ADMIN</div>
-            <h2 style={responsiveStyles.title}>Sign in</h2>
-            <p style={styles.subtitle}>
-              Sign in to manage appointments, prescriptions, and your healthcare journey.
-            </p>
+          <div style={styles.mobileLogoWrap}>
+            <AppLogo width={190} />
           </div>
 
+          <div style={styles.miniBadge}>Universal Signup</div>
+          <h2 style={styles.title}>Create account</h2>
+          <p style={styles.subtitle}>
+            Admins should be created separately. Patients and doctors can register here.
+          </p>
+
           <form onSubmit={handleSubmit} style={styles.form}>
+            <label style={styles.label}>Full name</label>
+            <input
+              type="text"
+              name="name"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              style={styles.input}
+              required
+            />
+
             <label style={styles.label}>Email address</label>
             <input
               type="email"
@@ -159,28 +134,36 @@ export default function LoginPage() {
             <input
               type="password"
               name="password"
-              placeholder="Enter your password"
+              placeholder="Create a password"
               value={formData.password}
               onChange={handleChange}
               style={styles.input}
               required
             />
 
+            <label style={styles.label}>Register as</label>
+            <select
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              style={styles.input}
+            >
+              <option value="patient">Patient</option>
+              <option value="doctor">Doctor</option>
+            </select>
+
             {error ? <div style={styles.error}>{error}</div> : null}
+            {success ? <div style={styles.success}>{success}</div> : null}
 
             <button type="submit" style={styles.button} disabled={loading}>
-              {loading ? "Signing in..." : "Login"}
+              {loading ? "Creating account..." : "Sign up"}
             </button>
           </form>
 
-          {/* <div style={styles.infoBox}>
-            Your dashboard and features will be ready for you right after login.
-          </div> */}
-
           <p style={styles.bottomText}>
-            New here?{" "}
-            <Link to="/signup" style={styles.link}>
-              Create one
+            Already have an account?{" "}
+            <Link to="/login" style={styles.link}>
+              Login here
             </Link>
           </p>
         </div>
@@ -193,7 +176,7 @@ const styles = {
   page: {
     minHeight: "100vh",
     display: "grid",
-    gridTemplateColumns: "1.1fr 0.9fr"
+    gridTemplateColumns: "1.05fr 0.95fr"
   },
   leftPanel: {
     padding: "48px 56px",
@@ -202,10 +185,6 @@ const styles = {
     justifyContent: "space-between",
     background:
       "linear-gradient(135deg, rgba(46,204,113,0.10) 0%, rgba(52,152,219,0.12) 100%)"
-  },
-  brandWrap: {
-    display: "flex",
-    alignItems: "center"
   },
   heroContent: {
     maxWidth: "620px"
@@ -221,7 +200,7 @@ const styles = {
     boxShadow: "0 8px 18px rgba(0,0,0,0.05)"
   },
   heading: {
-    fontSize: "52px",
+    fontSize: "50px",
     lineHeight: "1.08",
     margin: "0 0 18px",
     color: "#243445"
@@ -230,26 +209,7 @@ const styles = {
     fontSize: "18px",
     lineHeight: "1.7",
     color: "#5f6f81",
-    margin: "0 0 32px"
-  },
-  featureGrid: {
-    display: "grid",
-    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-    gap: "16px"
-  },
-  featureCard: {
-    background: "#ffffff",
-    borderRadius: "20px",
-    padding: "18px 20px",
-    display: "flex",
-    alignItems: "center",
-    gap: "12px",
-    fontWeight: "600",
-    color: "#2c3e50",
-    boxShadow: "0 12px 24px rgba(0,0,0,0.05)"
-  },
-  featureIcon: {
-    fontSize: "20px"
+    margin: 0
   },
   rightPanel: {
     display: "flex",
@@ -265,9 +225,6 @@ const styles = {
     padding: "34px",
     boxShadow: "0 24px 60px rgba(44, 62, 80, 0.12)",
     border: "1px solid #eef2f7"
-  },
-  cardTop: {
-    marginBottom: "26px"
   },
   mobileLogoWrap: {
     marginBottom: "14px"
@@ -288,7 +245,7 @@ const styles = {
     color: "#243445"
   },
   subtitle: {
-    margin: "10px 0 0",
+    margin: "10px 0 24px",
     color: "#667788",
     lineHeight: "1.7"
   },
@@ -334,15 +291,14 @@ const styles = {
     fontSize: "14px",
     border: "1px solid #ffd9d5"
   },
-  infoBox: {
-    marginTop: "20px",
-    padding: "14px 16px",
-    borderRadius: "14px",
-    background: "#f7fbff",
-    color: "#5f6f81",
+  success: {
+    marginTop: "4px",
+    padding: "12px 14px",
+    borderRadius: "12px",
+    background: "#edfdf3",
+    color: "#1f8f55",
     fontSize: "14px",
-    lineHeight: "1.6",
-    border: "1px solid #e7eef7"
+    border: "1px solid #ccefd9"
   },
   bottomText: {
     marginTop: "18px",
@@ -354,11 +310,5 @@ const styles = {
   link: {
     color: "#3498db",
     fontWeight: "700"
-  },
-  logoWrap: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "18px"
-  },
-  
+  }
 };

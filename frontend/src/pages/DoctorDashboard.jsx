@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import AppLogo from "../components/AppLogo";
 
 export default function DoctorDashboard() {
   const navigate = useNavigate();
@@ -13,7 +14,7 @@ export default function DoctorDashboard() {
     <div style={styles.page}>
       <div style={styles.navbar}>
         <div>
-          <h2 style={styles.logo}>MediCare+</h2>
+          <AppLogo width={170} />
           <p style={styles.smallText}>Doctor Workspace</p>
         </div>
         <button onClick={handleLogout} style={styles.logoutButton}>
@@ -56,12 +57,8 @@ const styles = {
     alignItems: "center",
     borderBottom: "1px solid #e8edf3"
   },
-  logo: {
-    margin: 0,
-    color: "#2c3e50"
-  },
   smallText: {
-    margin: "4px 0 0",
+    margin: "6px 0 0",
     color: "#6b7b8c",
     fontSize: "14px"
   },
