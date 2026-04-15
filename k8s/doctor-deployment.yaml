@@ -19,7 +19,7 @@ spec:
             - containerPort: 5003
           env:
             - name: MONGO_URI
-              value: "mongodb+srv://medicare_user:iHateMern99@cluster0.ilgjnhv.mongodb.net/medicare_doctor?retryWrites=true&w=majority&appName=Cluster0"
+              value: "YOUR_MONGO_URI"
             - name: JWT_SECRET
               value: "super_secret_key_123"
             - name: PORT
