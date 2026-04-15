@@ -10,6 +10,7 @@ import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
 import PatientDashboard from "./pages/PatientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
+import HomePage from "./pages/HomePage";
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -39,12 +40,7 @@ export default function App() {
 
   return (
     <Routes>
-      <Route
-        path="/"
-        element={
-          token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
-        }
-      />
+      <Route path="/" element={<HomePage />} />
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
