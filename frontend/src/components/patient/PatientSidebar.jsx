@@ -1,14 +1,7 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink } from "react-router-dom";
+import "./patientSidebar.css";
 
 export default function PatientSidebar() {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    navigate("/login");
-  };
-
   return (
     <aside className="patient-sidebar">
       <div className="brand">MediCare+</div>
@@ -20,7 +13,7 @@ export default function PatientSidebar() {
         <NavLink to="/patient/reports">Medical Reports</NavLink>
         <NavLink to="/patient/prescriptions">Prescriptions</NavLink>
         <NavLink to="/patient/history">Health History</NavLink>
-        <button className="logout-btn" onClick={handleLogout}>Logout</button>
+        <NavLink to="/patient/logout">Logout</NavLink>
       </nav>
     </aside>
   );
