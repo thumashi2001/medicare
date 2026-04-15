@@ -18,7 +18,17 @@ const patientSchema = new mongoose.Schema({
                 default: Date.now
             }
         }
-    ]
+    ],
+    prescriptions: [
+  {
+    doctor: String,
+    details: String,
+    date: {
+      type: Date,
+      default: Date.now
+    }
+  }
+]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Patient", patientSchema);
