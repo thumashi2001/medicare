@@ -1,5 +1,6 @@
 const DoctorProfile = require("../models/DoctorProfile");
 const Availability = require("../models/Availability");
+const Prescription = require("../models/Prescription");
 
 const getHealth = (req, res) => {
     res.status(200).json({
@@ -254,6 +255,119 @@ const deleteAvailabilityById = async (req, res) => {
     }
 };
 
+const createPrescription = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+        const { patientId, appointmentId, diagnosis, medicines, notes } = req.body;
+
+        if (!patientId || !diagnosis || !medicines || medicines.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "patientId, diagnosis and medicines are required"
+            });
+        }
+
+        const prescription = await Prescription.create({
+            doctorId,
+            patientId,
+            appointmentId,
+            diagnosis,
+            medicines,
+            notes
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Prescription created successfully",
+            data: prescription
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to create prescription",
+            error: error.message
+        });
+    }
+};
+
+const getMyPrescriptions = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+
+        const prescriptions = await Prescription.find({ doctorId }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: prescriptions.length,
+            data: prescriptions
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch prescriptions",
+            error: error.message
+        });
+    }
+};
+
+const getPrescriptionById = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const doctorId = req.user.id;
+
+        const prescription = await Prescription.findById(id);
+
+        if (!prescription) {
+            return res.status(404).json({
+                success: false,
+                message: "Prescription not found"
+            });
+        }
+
+        if (prescription.doctorId !== doctorId) {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: prescription
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch prescription",
+            error: error.message
+        });
+    }
+};
+
+const getPrescriptionsByPatient = async (req, res) => {
+    try {
+        const { patientId } = req.params;
+        const doctorId = req.user.id;
+
+        const prescriptions = await Prescription.find({
+            doctorId,
+            patientId
+        }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: prescriptions.length,
+            data: prescriptions
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch patient prescriptions",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getHealth,
     createDoctorProfile,
@@ -262,5 +376,9 @@ module.exports = {
     createAvailability,
     getMyAvailability,
     updateAvailabilityById,
-    deleteAvailabilityById
+    deleteAvailabilityById,
+    createPrescription,
+    getMyPrescriptions,
+    getPrescriptionById,
+    getPrescriptionsByPatient
 };
