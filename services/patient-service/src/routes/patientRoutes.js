@@ -7,7 +7,8 @@ const {
   updateProfile,
   uploadReport,
   getReports,
-  getPrescriptions
+  getPrescriptions,
+  deleteReport
 } = require("../controllers/patientController");
 
 const { protect, authorize } = require("../middleware/authMiddleware");
@@ -20,6 +21,6 @@ router.put("/profile", protect, authorize("patient"), updateProfile);
 
 router.post("/upload", protect, authorize("patient"), upload.single("report"), uploadReport);
 router.get("/reports", protect, authorize("patient"), getReports);
+router.delete("/reports/:reportId", protect, authorize("patient"), deleteReport);
 router.get("/prescriptions", protect, authorize("patient"), getPrescriptions);
-
 module.exports = router;

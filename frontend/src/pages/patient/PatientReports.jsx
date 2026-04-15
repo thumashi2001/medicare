@@ -14,6 +14,7 @@ export default function PatientReports() {
       const mapped = res.data.map((item, index) => ({
         id: item._id || index,
         name:
+          item.originalName ||
           item.filePath?.split("\\").pop()?.split("/").pop() ||
           `Report ${index + 1}`,
         uploadDate: item.uploadedAt
@@ -61,6 +62,27 @@ export default function PatientReports() {
     }
   };
 
+  const handleDownload = (filePath) => {
+    if (!filePath) return;
+
+    const normalizedPath = filePath.replaceAll("\\", "/");
+    const cleanPath = normalizedPath.replace(/^uploads\//, "");
+    const downloadUrl = `http://localhost:5002/uploads/${cleanPath}`;
+
+    window.open(downloadUrl, "_blank");
+  };
+
+  const handleDelete = async (reportId) => {
+    try {
+      await API.delete(`/patients/reports/${reportId}`);
+      setMessage("Report deleted successfully");
+      fetchReports();
+    } catch (error) {
+      console.error("Delete error:", error);
+      setMessage("Failed to delete report");
+    }
+  };
+
   return (
     <div className="reports-page">
       <div className="page-header">
@@ -100,10 +122,20 @@ export default function PatientReports() {
                   <td>{report.uploadDate}</td>
                   <td>{report.doctor}</td>
                   <td className="actions-cell">
-                    <button className="icon-btn" type="button">
+                    <button
+                      className="icon-btn"
+                      type="button"
+                      onClick={() => handleDownload(report.filePath)}
+                      title="Download"
+                    >
                       ⬇
                     </button>
-                    <button className="icon-btn delete" type="button">
+                    <button
+                      className="icon-btn delete"
+                      type="button"
+                      onClick={() => handleDelete(report.id)}
+                      title="Delete"
+                    >
                       🗑
                     </button>
                   </td>

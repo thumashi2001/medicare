@@ -1,4 +1,5 @@
 const Patient = require("../models/Patient");
+const fs = require("fs");
 
 // CREATE patient profile
 exports.createProfile = async (req, res) => {
@@ -83,7 +84,8 @@ exports.uploadReport = async (req, res) => {
     }
 
     patient.reports.push({
-      filePath: req.file.path
+      filePath: req.file.path,
+      originalName: req.file.originalname
     });
 
     await patient.save();
@@ -107,6 +109,38 @@ exports.getReports = async (req, res) => {
     }
 
     res.json(patient.reports);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+//Delete report
+exports.deleteReport = async (req, res) => {
+  try {
+    const { reportId } = req.params;
+
+    const patient = await Patient.findOne({ userId: req.user.id });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient profile not found" });
+    }
+
+    const report = patient.reports.id(reportId);
+
+    if (!report) {
+      return res.status(404).json({ message: "Report not found" });
+    }
+
+    const filePath = report.filePath;
+
+    patient.reports.pull(reportId);
+    await patient.save();
+
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+
+    res.json({ message: "Report deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
