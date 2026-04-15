@@ -99,3 +99,47 @@ exports.verifyDoctor = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.getPendingDoctors = async (req, res) => {
+  try {
+    const doctors = await User.find({
+      role: "doctor",
+      isVerified: false
+    }).select("-password");
+
+    res.json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getVerifiedDoctors = async (req, res) => {
+  try {
+    const doctors = await User.find({
+      role: "doctor",
+      isVerified: true
+    }).select("-password");
+
+    res.json(doctors);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.rejectDoctor = async (req, res) => {
+  try {
+    const doctor = await User.findById(req.params.id);
+
+    if (!doctor || doctor.role !== "doctor") {
+      return res.status(404).json({ message: "Doctor not found" });
+    }
+
+    doctor.rejected = true;
+    doctor.isVerified = false;
+    await doctor.save();
+
+    res.json({ message: "Doctor rejected successfully" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
