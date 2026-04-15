@@ -1,81 +1,168 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api/axios";
 import "./patientProfile.css";
 
 export default function PatientProfile() {
   const [profile, setProfile] = useState({
-    fullName: "Anushka Fernando",
-    email: "anushka@example.com",
-    phone: "071 234 5678",
-    dob: "1996-09-15",
-    address: "123, Galle Road, Colombo 04"
+    fullName: "",
+    email: "",
+    phone: "",
+    dob: "",
+    address: ""
   });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
 
-    axios
-      .get("http://localhost:5002/api/patients/profile", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((res) => {
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await API.get("/patients/profile");
         const data = res.data || {};
-        setProfile((prev) => ({
-          ...prev,
-          fullName: data.name || prev.fullName,
-          email: data.email || prev.email,
-          phone: data.phone || prev.phone,
-          dob: data.dob || prev.dob,
-          address: data.address || prev.address
-        }));
-      })
-      .catch(() => {
-        console.log("Using mock profile data");
-      });
+
+        setProfile({
+          fullName: data.fullName || "",
+          email: data.email || "",
+          phone: data.phone || "",
+          dob: data.dob || "",
+          address: data.address || ""
+        });
+
+        if (data.fullName) {
+          localStorage.setItem("name", data.fullName);
+        }
+      } catch (error) {
+        console.error("Profile fetch error:", error);
+        setMessage("Could not load profile from backend.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, []);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setProfile((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleUpdate = async () => {
+    try {
+      setSaving(true);
+      setMessage("");
+
+      const res = await API.put("/patients/profile", profile);
+
+      setMessage(res.data.message || "Profile updated successfully");
+      localStorage.setItem("name", profile.fullName);
+    } catch (error) {
+      console.error("Profile update error:", error);
+      setMessage("Failed to update profile");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChangePhoto = () => {
+    alert("Profile photo upload can be added next.");
+  };
+
+  if (loading) {
+    return (
+      <div className="profile-page">
+        <h2>My Profile</h2>
+        <p className="profile-subtitle">Loading profile...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="profile-page">
       <h2>My Profile</h2>
       <p className="profile-subtitle">Manage your personal information</p>
 
+      {message && <p className="profile-message">{message}</p>}
+
       <div className="profile-card">
         <div className="profile-left">
-          <div className="profile-avatar">A</div>
-          <button className="change-photo-btn">Change Photo</button>
+          <div className="profile-avatar">
+            {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : "A"}
+          </div>
+          <button
+            className="change-photo-btn"
+            type="button"
+            onClick={handleChangePhoto}
+          >
+            Change Photo
+          </button>
         </div>
 
         <div className="profile-form">
           <div className="form-group">
             <label>Full Name</label>
-            <input type="text" value={profile.fullName} readOnly />
+            <input
+              type="text"
+              name="fullName"
+              value={profile.fullName}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Email</label>
-            <input type="text" value={profile.email} readOnly />
+            <input
+              type="text"
+              name="email"
+              value={profile.email}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-group">
             <label>Phone Number</label>
-            <input type="text" value={profile.phone} readOnly />
+            <input
+              type="text"
+              name="phone"
+              value={profile.phone}
+              onChange={handleChange}
+            />
           </div>
 
           <div className="form-row">
             <div className="form-group">
               <label>Date of Birth</label>
-              <input type="text" value={profile.dob} readOnly />
+              <input
+                type="text"
+                name="dob"
+                value={profile.dob}
+                onChange={handleChange}
+              />
             </div>
 
             <div className="form-group">
               <label>Address</label>
-              <input type="text" value={profile.address} readOnly />
+              <input
+                type="text"
+                name="address"
+                value={profile.address}
+                onChange={handleChange}
+              />
             </div>
           </div>
 
-          <button className="update-btn">Update Profile</button>
+          <button
+            className="update-btn"
+            type="button"
+            onClick={handleUpdate}
+            disabled={saving}
+          >
+            {saving ? "Updating..." : "Update Profile"}
+          </button>
         </div>
       </div>
     </div>

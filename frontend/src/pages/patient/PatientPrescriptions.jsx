@@ -1,55 +1,41 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api/axios";
 import "./patientPrescriptions.css";
 
 export default function PatientPrescriptions() {
-  const [prescriptions, setPrescriptions] = useState([
-    {
-      medication: "Amlodipine 5mg",
-      dosage: "1 tablet daily",
-      doctor: "Dr. Kavinda Silva",
-      date: "15 Jan 2024",
-      status: "Active"
-    },
-    {
-      medication: "Cetirizine 10mg",
-      dosage: "1 tablet at night",
-      doctor: "Dr. Nirmali Perera",
-      date: "10 Jan 2024",
-      status: "Completed"
-    }
-  ]);
+  const [prescriptions, setPrescriptions] = useState([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const fetchPrescriptions = async () => {
+      try {
+        const res = await API.get("/patients/prescriptions");
 
-    axios
-      .get("http://localhost:5002/api/patients/prescriptions", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const mapped = res.data.map((item) => ({
-            medication: item.details || "Medication",
-            dosage: "1 tablet daily",
-            doctor: item.doctor || "Unknown Doctor",
-            date: item.date ? new Date(item.date).toLocaleDateString() : "N/A",
-            status: "Active"
-          }));
-          setPrescriptions(mapped);
-        }
-      })
-      .catch(() => {
-        console.log("Using mock prescriptions");
-      });
+        const mapped = res.data.map((item, index) => ({
+          id: item._id || index,
+          medication: item.details || "Medication",
+          dosage: "1 tablet daily",
+          doctor: item.doctor || "Unknown Doctor",
+          date: item.date ? new Date(item.date).toLocaleDateString() : "N/A",
+          status: "Active"
+        }));
+
+        setPrescriptions(mapped);
+      } catch (error) {
+        console.error("Prescriptions fetch error:", error);
+        setMessage("Could not load prescriptions from backend.");
+      }
+    };
+
+    fetchPrescriptions();
   }, []);
 
   return (
     <div className="prescriptions-page">
       <h2>Prescriptions</h2>
       <p className="page-subtitle">Your prescribed medications</p>
+
+      {message && <p className="prescriptions-message">{message}</p>}
 
       <div className="prescriptions-card">
         <table className="prescriptions-table">
@@ -63,25 +49,25 @@ export default function PatientPrescriptions() {
             </tr>
           </thead>
           <tbody>
-            {prescriptions.map((item, index) => (
-              <tr key={index}>
-                <td>{item.medication}</td>
-                <td>{item.dosage}</td>
-                <td>{item.doctor}</td>
-                <td>{item.date}</td>
-                <td>
-                  <span
-                    className={
-                      item.status === "Active"
-                        ? "status-badge active"
-                        : "status-badge completed"
-                    }
-                  >
-                    {item.status}
-                  </span>
+            {prescriptions.length > 0 ? (
+              prescriptions.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.medication}</td>
+                  <td>{item.dosage}</td>
+                  <td>{item.doctor}</td>
+                  <td>{item.date}</td>
+                  <td>
+                    <span className="status-badge active">{item.status}</span>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="5" style={{ textAlign: "center" }}>
+                  No prescriptions found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

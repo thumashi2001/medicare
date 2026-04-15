@@ -64,3 +64,9 @@
 .icon-btn.delete {
   color: #e74c3c;
 }
+
+.reports-message {
+  margin-bottom: 16px;
+  color: #e67e22;
+  font-weight: 600;
+}

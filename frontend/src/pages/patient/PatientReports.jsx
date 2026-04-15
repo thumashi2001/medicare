@@ -1,45 +1,33 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import API from "../../api/axios";
 import "./patientReports.css";
 
 export default function PatientReports() {
-  const [reports, setReports] = useState([
-    {
-      name: "Blood Test Report",
-      uploadDate: "15 Jan 2024",
-      doctor: "Dr. Kavinda Silva"
-    },
-    {
-      name: "X-Ray Chest",
-      uploadDate: "10 Jan 2024",
-      doctor: "Dr. Nirmali Perera"
-    }
-  ]);
+  const [reports, setReports] = useState([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    const fetchReports = async () => {
+      try {
+        const res = await API.get("/patients/reports");
 
-    axios
-      .get("http://localhost:5002/api/patients/reports", {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      })
-      .then((res) => {
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          const mapped = res.data.map((item, index) => ({
-            name: item.filePath?.split("/").pop() || `Report ${index + 1}`,
-            uploadDate: item.uploadedAt
-              ? new Date(item.uploadedAt).toLocaleDateString()
-              : "N/A",
-            doctor: "Dr. Kavinda Silva"
-          }));
-          setReports(mapped);
-        }
-      })
-      .catch(() => {
-        console.log("Using mock reports");
-      });
+        const mapped = res.data.map((item, index) => ({
+          id: item._id || index,
+          name: item.filePath?.split("\\").pop()?.split("/").pop() || `Report ${index + 1}`,
+          uploadDate: item.uploadedAt
+            ? new Date(item.uploadedAt).toLocaleDateString()
+            : "N/A",
+          doctor: "Doctor"
+        }));
+
+        setReports(mapped);
+      } catch (error) {
+        console.error("Reports fetch error:", error);
+        setMessage("Could not load reports from backend.");
+      }
+    };
+
+    fetchReports();
   }, []);
 
   return (
@@ -49,8 +37,12 @@ export default function PatientReports() {
           <h2>Medical Reports</h2>
           <p>Upload and view your reports</p>
         </div>
-        <button className="upload-btn">Upload New Report</button>
+        <button className="upload-btn" type="button">
+          Upload New Report
+        </button>
       </div>
+
+      {message && <p className="reports-message">{message}</p>}
 
       <div className="reports-table-card">
         <table className="reports-table">
@@ -63,17 +55,25 @@ export default function PatientReports() {
             </tr>
           </thead>
           <tbody>
-            {reports.map((report, index) => (
-              <tr key={index}>
-                <td>{report.name}</td>
-                <td>{report.uploadDate}</td>
-                <td>{report.doctor}</td>
-                <td className="actions-cell">
-                  <button className="icon-btn">⬇</button>
-                  <button className="icon-btn delete">🗑</button>
+            {reports.length > 0 ? (
+              reports.map((report) => (
+                <tr key={report.id}>
+                  <td>{report.name}</td>
+                  <td>{report.uploadDate}</td>
+                  <td>{report.doctor}</td>
+                  <td className="actions-cell">
+                    <button className="icon-btn" type="button">⬇</button>
+                    <button className="icon-btn delete" type="button">🗑</button>
+                  </td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="4" style={{ textAlign: "center" }}>
+                  No reports found
                 </td>
               </tr>
-            ))}
+            )}
           </tbody>
         </table>
       </div>

@@ -86,3 +86,15 @@
   cursor: pointer;
   font-weight: 600;
 }
+
+.profile-error {
+  margin-bottom: 16px;
+  color: #e67e22;
+  font-weight: 500;
+}
+
+.profile-message {
+  margin-bottom: 16px;
+  color: #27ae60;
+  font-weight: 600;
+}
