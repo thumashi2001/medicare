@@ -10,8 +10,8 @@ const getHealth = (req, res) => {
 
 const createDoctorProfile = async (req, res) => {
     try {
+        const userId = req.user.id;
         const {
-            userId,
             specialization,
             hospital,
             experience,
@@ -21,10 +21,10 @@ const createDoctorProfile = async (req, res) => {
             profileImage
         } = req.body;
 
-        if (!userId || !specialization) {
+        if (!specialization) {
             return res.status(400).json({
                 success: false,
-                message: "userId and specialization are required"
+                message: "specialization is required"
             });
         }
 
@@ -62,9 +62,9 @@ const createDoctorProfile = async (req, res) => {
     }
 };
 
-const getDoctorProfileByUserId = async (req, res) => {
+const getMyDoctorProfile = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user.id;
 
         const doctorProfile = await DoctorProfile.findOne({ userId });
 
@@ -88,9 +88,9 @@ const getDoctorProfileByUserId = async (req, res) => {
     }
 };
 
-const updateDoctorProfileByUserId = async (req, res) => {
+const updateMyDoctorProfile = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user.id;
 
         const updatedProfile = await DoctorProfile.findOneAndUpdate(
             { userId },
@@ -121,12 +121,13 @@ const updateDoctorProfileByUserId = async (req, res) => {
 
 const createAvailability = async (req, res) => {
     try {
-        const { userId, dayOfWeek, startTime, endTime, mode, isAvailable } = req.body;
+        const userId = req.user.id;
+        const { dayOfWeek, startTime, endTime, mode, isAvailable } = req.body;
 
-        if (!userId || !dayOfWeek || !startTime || !endTime) {
+        if (!dayOfWeek || !startTime || !endTime) {
             return res.status(400).json({
                 success: false,
-                message: "userId, dayOfWeek, startTime and endTime are required"
+                message: "dayOfWeek, startTime and endTime are required"
             });
         }
 
@@ -153,9 +154,9 @@ const createAvailability = async (req, res) => {
     }
 };
 
-const getAvailabilityByUserId = async (req, res) => {
+const getMyAvailability = async (req, res) => {
     try {
-        const { userId } = req.params;
+        const userId = req.user.id;
 
         const availabilitySlots = await Availability.find({ userId }).sort({
             dayOfWeek: 1,
@@ -179,19 +180,29 @@ const getAvailabilityByUserId = async (req, res) => {
 const updateAvailabilityById = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;
+
+        const availability = await Availability.findById(id);
+
+        if (!availability) {
+            return res.status(404).json({
+                success: false,
+                message: "Availability slot not found"
+            });
+        }
+
+        if (availability.userId !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only update your own availability slots"
+            });
+        }
 
         const updatedAvailability = await Availability.findByIdAndUpdate(
             id,
             req.body,
             { new: true, runValidators: true }
         );
-
-        if (!updatedAvailability) {
-            return res.status(404).json({
-                success: false,
-                message: "Availability slot not found"
-            });
-        }
 
         res.status(200).json({
             success: true,
@@ -210,15 +221,25 @@ const updateAvailabilityById = async (req, res) => {
 const deleteAvailabilityById = async (req, res) => {
     try {
         const { id } = req.params;
+        const userId = req.user.id;
 
-        const deletedAvailability = await Availability.findByIdAndDelete(id);
+        const availability = await Availability.findById(id);
 
-        if (!deletedAvailability) {
+        if (!availability) {
             return res.status(404).json({
                 success: false,
                 message: "Availability slot not found"
             });
         }
+
+        if (availability.userId !== userId) {
+            return res.status(403).json({
+                success: false,
+                message: "You can only delete your own availability slots"
+            });
+        }
+
+        await Availability.findByIdAndDelete(id);
 
         res.status(200).json({
             success: true,
@@ -236,10 +257,10 @@ const deleteAvailabilityById = async (req, res) => {
 module.exports = {
     getHealth,
     createDoctorProfile,
-    getDoctorProfileByUserId,
-    updateDoctorProfileByUserId,
+    getMyDoctorProfile,
+    updateMyDoctorProfile,
     createAvailability,
-    getAvailabilityByUserId,
+    getMyAvailability,
     updateAvailabilityById,
     deleteAvailabilityById
 };
