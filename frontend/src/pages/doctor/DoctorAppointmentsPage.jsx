@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 const DOCTOR_API = "http://localhost:5003";
+const TELEMEDICINE_BASE_URL = "http://localhost:5174";
 
 export default function DoctorAppointmentsPage() {
   const token = localStorage.getItem("token");
@@ -69,6 +70,11 @@ export default function DoctorAppointmentsPage() {
     }
   };
 
+  const joinConsultation = (appointmentId) => {
+    const consultationUrl = `${TELEMEDICINE_BASE_URL}/video-room/${appointmentId}`;
+    window.open(consultationUrl, "_blank");
+  };
+
   return (
     <div style={styles.wrapper}>
       <div style={styles.headerCard}>
@@ -93,6 +99,7 @@ export default function DoctorAppointmentsPage() {
           <div style={styles.appointmentList}>
             {appointments.map((appointment) => {
               const isPending = appointment.status === "pending";
+              const isAccepted = appointment.status === "accepted";
               const isProcessing = processingId === appointment._id;
 
               return (
@@ -104,6 +111,9 @@ export default function DoctorAppointmentsPage() {
                       </div>
                       <div style={styles.metaText}>
                         Date: {appointment.date} | Time: {appointment.time}
+                      </div>
+                      <div style={styles.metaText}>
+                        Appointment ID: {appointment._id}
                       </div>
                     </div>
 
@@ -145,6 +155,15 @@ export default function DoctorAppointmentsPage() {
                     >
                       {isProcessing ? "Processing..." : "Reject"}
                     </button>
+
+                    {isAccepted ? (
+                      <button
+                        onClick={() => joinConsultation(appointment._id)}
+                        style={styles.joinButton}
+                      >
+                        Join Consultation
+                      </button>
+                    ) : null}
                   </div>
                 </div>
               );
@@ -243,7 +262,8 @@ const styles = {
   },
   actionRow: {
     display: "flex",
-    gap: "10px"
+    gap: "10px",
+    flexWrap: "wrap"
   },
   acceptButton: {
     border: "none",
@@ -260,6 +280,15 @@ const styles = {
     padding: "10px 16px",
     borderRadius: "12px",
     fontWeight: "600"
+  },
+  joinButton: {
+    border: "none",
+    background: "#3498db",
+    color: "#fff",
+    padding: "10px 16px",
+    borderRadius: "12px",
+    fontWeight: "600",
+    cursor: "pointer"
   },
   text: {
     color: "#6b7b8c"
