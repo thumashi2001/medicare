@@ -10,22 +10,24 @@ const LiveCall = ({
   setMicOn,
   videoOn,
   setVideoOn,
-  client, 
+  client,
+  token, // Added token prop
 }) => {
   const remoteUsers = useRemoteUsers();
 
   useEffect(() => {
     const joinAndPublish = async () => {
-      if (!localCameraTrack || !localMicrophoneTrack) return;
+      // Ensure we have tracks and a token before joining
+      if (!localCameraTrack || !localMicrophoneTrack || !token) return;
 
       try {
+        // Change inside client.join:
         await client.join(
-          "7fdb2f9971a44340b66e10f9712e9493",
+          import.meta.env.VITE_AGORA_APP_ID,
           channelName,
+          token,
           null,
-          null
         );
-
         localCameraTrack.setEnabled(videoOn);
         localMicrophoneTrack.setEnabled(micOn);
 
@@ -52,7 +54,8 @@ const LiveCall = ({
       };
       leaveChannel();
     };
-  }, [localCameraTrack, localMicrophoneTrack, channelName, client]);
+    // Added token to dependency array
+  }, [localCameraTrack, localMicrophoneTrack, channelName, client, token]);
 
   const toggleMic = () => {
     if (localMicrophoneTrack) localMicrophoneTrack.setEnabled(!micOn);
@@ -87,14 +90,30 @@ const LiveCall = ({
             position: "relative",
           }}
         >
-          <p style={{ margin: "5px", color: "#fff", zIndex: 10, position: "absolute" }}>You</p>
+          <p
+            style={{
+              margin: "5px",
+              color: "#fff",
+              zIndex: 10,
+              position: "absolute",
+            }}
+          >
+            You
+          </p>
           {localCameraTrack && (
-            <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+            <div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+              }}
+            >
               <LocalVideoTrack
                 track={localCameraTrack}
                 play={true}
-                // THIS FIXES THE CROPPING:
-                videoPlayerConfig={{ fit: "contain" }} 
+                videoPlayerConfig={{ fit: "contain" }}
                 style={{ width: "100%", height: "100%" }}
               />
             </div>
@@ -114,37 +133,70 @@ const LiveCall = ({
             position: "relative",
           }}
         >
-          <p style={{ margin: "5px", color: "white", zIndex: 10, position: "absolute" }}>
+          <p
+            style={{
+              margin: "5px",
+              color: "white",
+              zIndex: 10,
+              position: "absolute",
+            }}
+          >
             Other Participant
           </p>
-          <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}>
+          <div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+            }}
+          >
             {remoteUsers.map((user) => (
               <RemoteUser
                 key={user.uid}
                 user={user}
                 play={true}
-                // APPLY TO REMOTE AS WELL:
                 videoPlayerConfig={{ fit: "contain" }}
                 style={{ width: "100%", height: "100%" }}
               />
             ))}
             {remoteUsers.length === 0 && (
-              <div style={{ display: "flex", height: "100%", alignItems: "center", justifyContent: "center" }}>
-                <p style={{ color: "white" }}>Waiting for other party to join...</p>
+              <div
+                style={{
+                  display: "flex",
+                  height: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <p style={{ color: "white" }}>
+                  Waiting for other party to join...
+                </p>
               </div>
             )}
           </div>
         </div>
       </div>
 
-      <div style={{ marginTop: "20px", display: "flex", justifyContent: "center", gap: "10px" }}>
+      <div
+        style={{
+          marginTop: "20px",
+          display: "flex",
+          justifyContent: "center",
+          gap: "10px",
+        }}
+      >
         <button onClick={toggleMic} style={{ padding: "10px 20px" }}>
           {micOn ? "🎤 Mute" : "🔇 Unmute"}
         </button>
         <button onClick={toggleVideo} style={{ padding: "10px 20px" }}>
           {videoOn ? "📷 Stop Video" : "🎥 Start Video"}
         </button>
-        <button onClick={onLeave} style={{ padding: "10px 20px", background: "#dc3545", color: "#fff" }}>
+        <button
+          onClick={onLeave}
+          style={{ padding: "10px 20px", background: "#dc3545", color: "#fff" }}
+        >
           Leave Call
         </button>
       </div>
