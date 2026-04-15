@@ -23,6 +23,13 @@
   padding: 12px 18px;
   font-weight: 600;
   cursor: pointer;
+  display: inline-block;
+}
+
+.reports-message {
+  margin-bottom: 16px;
+  color: #27ae60;
+  font-weight: 600;
 }
 
 .reports-table-card {
@@ -63,10 +70,4 @@
 
 .icon-btn.delete {
   color: #e74c3c;
-}
-
-.reports-message {
-  margin-bottom: 16px;
-  color: #e67e22;
-  font-weight: 600;
 }
