@@ -1,6 +1,7 @@
 const DoctorProfile = require("../models/DoctorProfile");
 const Availability = require("../models/Availability");
 const Prescription = require("../models/Prescription");
+const Appointment = require("../models/Appointment");
 
 const getHealth = (req, res) => {
     res.status(200).json({
@@ -368,6 +369,116 @@ const getPrescriptionsByPatient = async (req, res) => {
     }
 };
 
+const createAppointment = async (req, res) => {
+    try {
+        const { patientId, date, time } = req.body;
+        const doctorId = req.user.id;
+
+        const appointment = await Appointment.create({
+            doctorId,
+            patientId,
+            date,
+            time
+        });
+
+        res.status(201).json({
+            success: true,
+            message: "Appointment created",
+            data: appointment
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to create appointment",
+            error: error.message
+        });
+    }
+};
+
+const getMyAppointments = async (req, res) => {
+    try {
+        const doctorId = req.user.id;
+
+        const appointments = await Appointment.find({ doctorId }).sort({ createdAt: -1 });
+
+        res.status(200).json({
+            success: true,
+            count: appointments.length,
+            data: appointments
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to fetch appointments",
+            error: error.message
+        });
+    }
+};
+
+const acceptAppointment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const doctorId = req.user.id;
+
+        const appointment = await Appointment.findById(id);
+
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: "Appointment not found" });
+        }
+
+        if (appointment.doctorId !== doctorId) {
+            return res.status(403).json({ success: false, message: "Not your appointment" });
+        }
+
+        appointment.status = "accepted";
+        await appointment.save();
+
+        res.json({
+            success: true,
+            message: "Appointment accepted",
+            data: appointment
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to accept appointment",
+            error: error.message
+        });
+    }
+};
+
+const rejectAppointment = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const doctorId = req.user.id;
+
+        const appointment = await Appointment.findById(id);
+
+        if (!appointment) {
+            return res.status(404).json({ success: false, message: "Appointment not found" });
+        }
+
+        if (appointment.doctorId !== doctorId) {
+            return res.status(403).json({ success: false, message: "Not your appointment" });
+        }
+
+        appointment.status = "rejected";
+        await appointment.save();
+
+        res.json({
+            success: true,
+            message: "Appointment rejected",
+            data: appointment
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Failed to reject appointment",
+            error: error.message
+        });
+    }
+};
+
 module.exports = {
     getHealth,
     createDoctorProfile,
@@ -380,5 +491,9 @@ module.exports = {
     createPrescription,
     getMyPrescriptions,
     getPrescriptionById,
-    getPrescriptionsByPatient
+    getPrescriptionsByPatient,
+    createAppointment,
+    getMyAppointments,
+    acceptAppointment,
+    rejectAppointment
 };

@@ -12,7 +12,11 @@ const {
     createPrescription,
     getMyPrescriptions,
     getPrescriptionById,
-    getPrescriptionsByPatient
+    getPrescriptionsByPatient,
+    createAppointment,
+    getMyAppointments,
+    acceptAppointment,
+    rejectAppointment
 } = require("../controllers/doctorController");
 const { protect, authorize } = require("../middleware/authMiddleware");
 
@@ -31,5 +35,10 @@ router.post("/prescriptions", protect, authorize("doctor"), createPrescription);
 router.get("/prescriptions", protect, authorize("doctor"), getMyPrescriptions);
 router.get("/prescriptions/:id", protect, authorize("doctor"), getPrescriptionById);
 router.get("/patient/:patientId/prescriptions", protect, authorize("doctor"), getPrescriptionsByPatient);
+
+router.post("/appointments", protect, authorize("doctor"), createAppointment);
+router.get("/appointments", protect, authorize("doctor"), getMyAppointments);
+router.put("/appointments/:id/accept", protect, authorize("doctor"), acceptAppointment);
+router.put("/appointments/:id/reject", protect, authorize("doctor"), rejectAppointment);
 
 module.exports = router;
