@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doctor-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doctor-service
+  template:
+    metadata:
+      labels:
+        app: doctor-service
+    spec:
+      containers:
+        - name: doctor-service
+          image: doctor-service:latest
+          ports:
+            - containerPort: 5003
+          env:
+            - name: MONGO_URI
+              value: "mongodb+srv://medicare_user:iHateMern99@cluster0.ilgjnhv.mongodb.net/medicare_doctor?retryWrites=true&w=majority&appName=Cluster0"
+            - name: JWT_SECRET
+              value: "super_secret_key_123"
+            - name: PORT
+              value: "5003"
