@@ -1,7 +1,12 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import DoctorDashboard from "./pages/DoctorDashboard";
+import DoctorLayout from "./components/DoctorLayout";
+import DoctorHome from "./pages/doctor/DoctorHome";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
+import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
+import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
+import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
 import PatientDashboard from "./pages/PatientDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 
@@ -47,10 +52,16 @@ export default function App() {
         path="/doctor"
         element={
           <ProtectedRoute allowedRole="doctor">
-            <DoctorDashboard />
+            <DoctorLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<DoctorHome />} />
+        <Route path="profile" element={<DoctorProfilePage />} />
+        <Route path="availability" element={<DoctorAvailabilityPage />} />
+        <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
+        <Route path="appointments" element={<DoctorAppointmentsPage />} />
+      </Route>
 
       <Route
         path="/patient"
