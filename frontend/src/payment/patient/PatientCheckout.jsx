@@ -5,7 +5,6 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState(null);
 
-  // All details captured via inputs manually to avoid API 404s
   const [billing, setBilling] = useState({
     firstName: "",
     lastName: "",
@@ -32,10 +31,10 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
     }
 
     setIsProcessing(true);
+    setPaymentStatus(null);
 
     try {
-      // 1. Backend Initiation
-      // Uses the manually entered email as patientUsername
+      // 1. Backend Payment Initiation (Port 5007)
       const { data } = await axios.post(
         "http://localhost:5007/api/payments/initiate",
         {
@@ -44,6 +43,7 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
         }
       );
 
+      // 2. PayHere Config
       const payment = {
         sandbox: data.sandbox,
         merchant_id: data.merchant_id,
@@ -51,7 +51,7 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
         cancel_url: `${window.location.origin}/patient/appointments`,
         notify_url: data.notify_url,
         order_id: data.order_id,
-        items: `Consultation: ${appointmentId}`,
+        items: `Appointment: ${appointmentId}`,
         amount: data.amount,
         currency: data.currency,
         hash: data.hash,
@@ -66,17 +66,24 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
 
       window.payhere.startPayment(payment);
 
+      // 3. Handling SDK Callbacks
       window.payhere.onCompleted = () => {
         setPaymentStatus("success");
         setIsProcessing(false);
-        setTimeout(() => { if (onSuccess) onSuccess(); }, 2000);
+        if (onSuccess) onSuccess(); 
       };
 
-      window.payhere.onDismissed = () => setIsProcessing(false);
-      window.payhere.onError = (err) => {
-        console.error(err);
+      window.payhere.onDismissed = () => {
         setIsProcessing(false);
+        console.warn("Payment dismissed by user");
       };
+
+      window.payhere.onError = (err) => {
+        setIsProcessing(false);
+        console.error("PayHere Error:", err);
+        alert("Payment failed. Please check your card details and try again.");
+      };
+
     } catch (error) {
       console.error(error);
       const msg = error.response?.data?.error || "Payment Initiation Failed";
@@ -108,22 +115,22 @@ const PatientCheckout = ({ appointmentId, onSuccess }) => {
           <input type="email" className={inputClass} placeholder="Email" value={billing.email} onChange={(e) => setBilling({...billing, email: e.target.value})} />
         </div>
         <div>
-          <label className={labelClass}>Phone Number</label>
+          <label className={labelClass}>Phone</label>
           <input type="text" className={inputClass} placeholder="07XXXXXXXX" value={billing.phone} onChange={(e) => setBilling({...billing, phone: e.target.value})} />
         </div>
         <div>
           <label className={labelClass}>Address</label>
-          <input type="text" className={inputClass} placeholder="Street Address" value={billing.address} onChange={(e) => setBilling({...billing, address: e.target.value})} />
+          <input type="text" className={inputClass} placeholder="Address" value={billing.address} onChange={(e) => setBilling({...billing, address: e.target.value})} />
         </div>
       </div>
 
       <button
         onClick={handlePayment}
         disabled={isProcessing || paymentStatus === "success"}
-        className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${
+        className={`w-full py-4 rounded-xl font-bold text-lg transition-all active:scale-95 ${
           isProcessing || paymentStatus === "success" 
             ? "bg-gray-100 text-gray-400" 
-            : "bg-[#F39C12] text-white hover:bg-[#e67e22] active:scale-95 shadow-lg shadow-[#F39C12]/20"
+            : "bg-[#F39C12] text-white hover:bg-[#e67e22] shadow-lg shadow-[#F39C12]/20"
         }`}
       >
         {isProcessing ? "Processing..." : "Pay Now"}

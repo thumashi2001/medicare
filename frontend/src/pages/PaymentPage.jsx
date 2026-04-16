@@ -1,5 +1,5 @@
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { getAppointmentById } from "../services/appointmentApi";
+import { getAppointmentById, updateAppointmentStatus } from "../services/appointmentApi";
 import { useState, useEffect } from "react";
 import PatientCheckout from "../payment/patient/PatientCheckout";
 
@@ -54,14 +54,26 @@ export default function PaymentPage() {
       try {
         const res = await getAppointmentById(aptId);
         setAppointment(res.data?.data || res.data);
-      } catch {
-        console.error("Failed to fetch appointment details");
+      } catch (err) {
+        console.error("Error loading appointment:", err);
       } finally {
         setFetchLoading(false);
       }
     };
     load();
   }, [aptId, navigate]);
+
+  // This function ensures the Appointment DB is updated once payment finishes
+  const handlePaymentSuccess = async () => {
+    try {
+      await updateAppointmentStatus(aptId, "Confirmed");
+      setStep(3);
+    } catch (error) {
+      console.error("Appointment DB update failed:", error);
+      alert("Payment successful, but we couldn't update your appointment status. Please contact support.");
+      setStep(3); 
+    }
+  };
 
   if (fetchLoading) return <div className="min-h-screen bg-green-light flex items-center justify-center"><div className="w-10 h-10 border-4 border-green-primary border-t-transparent rounded-full animate-spin" /></div>;
 
@@ -74,15 +86,15 @@ export default function PaymentPage() {
       {step === 1 && (
         <div className="bg-white rounded-2xl shadow-md p-8 w-full max-w-md animate-in fade-in slide-in-from-bottom-2 duration-300">
           <h1 className="text-xl font-bold text-gray-800 mb-1">Booking Summary</h1>
-          <p className="text-sm text-gray-500 mb-5">Review your session details.</p>
+          <p className="text-sm text-gray-500 mb-5">Verify your details before payment.</p>
 
-          <div className="flex items-center gap-4 bg-green-light rounded-2xl p-4 mb-6">
+          <div className="flex items-center gap-4 bg-green-light rounded-2xl p-4 mb-6 text-sm">
             <div className="w-12 h-12 rounded-full bg-green-dark flex items-center justify-center text-white font-bold">
               {appointment?.doctorName?.charAt(0) || "D"}
             </div>
             <div>
               <p className="font-semibold text-gray-800">{appointment?.doctorName}</p>
-              <p className="text-xs text-green-dark font-medium">{appointment?.doctorSpecialty}</p>
+              <p className="text-green-dark font-medium">{appointment?.doctorSpecialty}</p>
             </div>
           </div>
 
@@ -92,16 +104,13 @@ export default function PaymentPage() {
               <span className="font-semibold text-gray-800">{formatDate(appointment?.appointmentDate)}</span>
             </div>
             <div className="flex justify-between px-5 py-4">
-              <span className="text-gray-400">Time Slot</span>
+              <span className="text-gray-400">Time</span>
               <span className="font-semibold text-gray-800">{appointment?.appointmentTime}</span>
             </div>
           </div>
 
-          <button
-            onClick={() => setStep(2)}
-            className="w-full bg-green-primary hover:bg-green-dark text-white font-bold py-4 rounded-2xl transition-all shadow-xl shadow-green-primary/20"
-          >
-            Confirm & Continue →
+          <button onClick={() => setStep(2)} className="w-full bg-green-primary text-white font-bold py-4 rounded-2xl shadow-xl hover:bg-green-dark transition-all">
+            Proceed to Payment →
           </button>
         </div>
       )}
@@ -110,9 +119,9 @@ export default function PaymentPage() {
         <div className="w-full max-w-md animate-in fade-in zoom-in-95 duration-300">
           <PatientCheckout 
             appointmentId={aptId} 
-            onSuccess={() => setStep(3)} 
+            onSuccess={handlePaymentSuccess} 
           />
-          <button onClick={() => setStep(1)} className="w-full mt-4 text-xs text-gray-400 font-black uppercase text-center">← Back</button>
+          <button onClick={() => setStep(1)} className="w-full mt-4 text-xs text-gray-400 font-black uppercase text-center hover:text-gray-600">← Back</button>
         </div>
       )}
 
@@ -120,8 +129,8 @@ export default function PaymentPage() {
         <div className="bg-white rounded-2xl shadow-md p-8 text-center max-w-sm w-full animate-in zoom-in-95 duration-300">
           <div className="text-5xl mb-4">🎉</div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Success!</h2>
-          <p className="text-gray-500 text-sm mb-6">Your payment was processed and the appointment is confirmed.</p>
-          <button onClick={() => navigate("/patient/appointments")} className="w-full bg-green-primary text-white font-semibold py-3 rounded-xl">View Dashboard</button>
+          <p className="text-gray-500 text-sm mb-6">Payment completed and appointment confirmed.</p>
+          <button onClick={() => navigate("/patient/appointments")} className="w-full bg-green-primary text-white font-semibold py-3 rounded-xl shadow-lg">View My Appointments</button>
         </div>
       )}
     </div>
