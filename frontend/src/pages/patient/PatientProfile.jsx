@@ -8,11 +8,13 @@ export default function PatientProfile() {
     email: "",
     phone: "",
     dob: "",
-    address: ""
+    address: "",
+    profileImage: ""
   });
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -26,7 +28,8 @@ export default function PatientProfile() {
           email: data.email || "",
           phone: data.phone || "",
           dob: data.dob || "",
-          address: data.address || ""
+          address: data.address || "",
+          profileImage: data.profileImage || ""
         });
 
         if (data.fullName) {
@@ -56,7 +59,13 @@ export default function PatientProfile() {
       setSaving(true);
       setMessage("");
 
-      const res = await API.put("/patients/profile", profile);
+      const res = await API.put("/patients/profile", {
+        fullName: profile.fullName,
+        email: profile.email,
+        phone: profile.phone,
+        dob: profile.dob,
+        address: profile.address
+      });
 
       setMessage(res.data.message || "Profile updated successfully");
       localStorage.setItem("name", profile.fullName);
@@ -68,8 +77,44 @@ export default function PatientProfile() {
     }
   };
 
-  const handleChangePhoto = () => {
-    alert("Profile photo upload can be added next.");
+  const handlePhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    try {
+      setUploadingPhoto(true);
+      setMessage("");
+
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      const res = await API.put("/patients/profile/photo", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      });
+
+      setProfile((prev) => ({
+        ...prev,
+        profileImage: res.data.profileImage
+      }));
+
+      setMessage(res.data.message || "Profile photo updated successfully");
+    } catch (error) {
+      console.error("Photo upload error:", error);
+      setMessage("Failed to upload profile photo");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  };
+
+  const getProfileImageUrl = () => {
+    if (!profile.profileImage) return "";
+
+    const normalizedPath = profile.profileImage.replaceAll("\\", "/");
+    const cleanPath = normalizedPath.replace(/^uploads\//, "");
+
+    return `http://localhost:5002/uploads/${cleanPath}`;
   };
 
   if (loading) {
@@ -91,15 +136,26 @@ export default function PatientProfile() {
       <div className="profile-card">
         <div className="profile-left">
           <div className="profile-avatar">
-            {profile.fullName ? profile.fullName.charAt(0).toUpperCase() : "A"}
+            {profile.profileImage ? (
+              <img
+                src={getProfileImageUrl()}
+                alt="Profile"
+                className="profile-avatar-image"
+              />
+            ) : (
+              profile.fullName?.charAt(0)?.toUpperCase() || "P"
+            )}
           </div>
-          <button
-            className="change-photo-btn"
-            type="button"
-            onClick={handleChangePhoto}
-          >
-            Change Photo
-          </button>
+
+          <label className="change-photo-btn">
+            {uploadingPhoto ? "Uploading..." : "Change Photo"}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              hidden
+            />
+          </label>
         </div>
 
         <div className="profile-form">
