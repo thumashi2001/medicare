@@ -2,17 +2,23 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import DoctorDashboard from "./pages/DoctorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 
 import PatientLayout from "./components/patient/PatientLayout";
 import PatientDashboard from "./pages/patient/PatientDashboard";
-// later you will add:
 import PatientProfile from "./pages/patient/PatientProfile";
 import PatientAppointments from "./pages/patient/PatientAppointments";
 import PatientReports from "./pages/patient/PatientReports";
 import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHistory from "./pages/patient/PatientHistory";
 import PatientLogout from "./pages/patient/PatientLogout";
+
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDoctorVerification from "./pages/admin/AdminDoctorVerification";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
+import AdminLogout from "./pages/admin/AdminLogout";
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -32,7 +38,7 @@ function ProtectedRoute({ children, allowedRole }) {
 function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
   if (role === "patient") return "/patient/dashboard";
-  if (role === "admin") return "/admin";
+  if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
 
@@ -45,7 +51,11 @@ export default function App() {
       <Route
         path="/"
         element={
-          token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
+          token ? (
+            <Navigate to={getDashboardRoute(role)} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
@@ -65,10 +75,18 @@ export default function App() {
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="doctor-verification" element={<AdminDoctorVerification />} />
+        <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="system-overview" element={<AdminSystemOverview />} />
+        <Route path="logout" element={<AdminLogout />} />
+      </Route>
 
       <Route
         path="/patient"
