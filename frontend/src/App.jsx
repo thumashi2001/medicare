@@ -1,16 +1,34 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+
 import DoctorLayout from "./components/DoctorLayout";
 import DoctorHome from "./pages/doctor/DoctorHome";
 import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
 import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
 import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
 import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
-import PatientDashboard from "./pages/PatientDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
 import HomePage from "./pages/HomePage";
+
+
+import PatientLayout from "./components/patient/PatientLayout";
+import PatientDashboard from "./pages/patient/PatientDashboard";
+import PatientProfile from "./pages/patient/PatientProfile";
+import PatientAppointments from "./pages/patient/PatientAppointments";
+import PatientReports from "./pages/patient/PatientReports";
+import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
+import PatientHistory from "./pages/patient/PatientHistory";
+import PatientLogout from "./pages/patient/PatientLogout";
+
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDoctorVerification from "./pages/admin/AdminDoctorVerification";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
+import AdminLogout from "./pages/admin/AdminLogout";
+
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -29,8 +47,8 @@ function ProtectedRoute({ children, allowedRole }) {
 
 function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
-  if (role === "patient") return "/patient";
-  if (role === "admin") return "/admin";
+  if (role === "patient") return "/patient/dashboard";
+  if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
 
@@ -40,7 +58,16 @@ export default function App() {
 
   return (
     <Routes>
-      <Route path="/" element={<HomePage />} />
+      <Route
+        path="/"
+        element={
+          token ? (
+            <Navigate to={getDashboardRoute(role)} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
 
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
@@ -62,22 +89,39 @@ export default function App() {
       </Route>
 
       <Route
-        path="/patient"
-        element={
-          <ProtectedRoute allowedRole="patient">
-            <PatientDashboard />
-          </ProtectedRoute>
-        }
-      />
-
-      <Route
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="doctor-verification" element={<AdminDoctorVerification />} />
+        <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="system-overview" element={<AdminSystemOverview />} />
+        <Route path="logout" element={<AdminLogout />} />
+      </Route>
+
+      <Route
+        path="/patient"
+        element={
+          <ProtectedRoute allowedRole="patient">
+            <PatientLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<PatientDashboard />} />
+        <Route path="profile" element={<PatientProfile />} />
+        <Route path="appointments" element={<PatientAppointments />} />
+        <Route path="reports" element={<PatientReports />} />
+        <Route path="prescriptions" element={<PatientPrescriptions />} />
+        <Route path="history" element={<PatientHistory />} />
+        <Route path="logout" element={<PatientLogout />} />
+      </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
