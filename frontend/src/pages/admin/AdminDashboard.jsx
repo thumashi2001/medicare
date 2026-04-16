@@ -11,29 +11,34 @@ export default function AdminDashboard() {
   });
 
   const [activities, setActivities] = useState([]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
-    const fetchDashboard = async () => {
+    const fetchDashboardData = async () => {
       try {
         const [statsRes, activitiesRes] = await Promise.all([
           adminAPI.get("/stats"),
-          adminAPI.get("/activities")
+          adminAPI.get("/recent-activities")
         ]);
 
+        const statsData = statsRes.data || {};
+        const activitiesData = activitiesRes.data || [];
+
         setStats({
-          totalUsers: statsRes.data.totalUsers || 0,
-          pendingDoctors: statsRes.data.pendingDoctors || 0,
-          transactions: statsRes.data.transactions || "Rs. 0.00",
-          activeAppointments: statsRes.data.activeAppointments || 0
+          totalUsers: statsData.totalUsers || 0,
+          pendingDoctors: statsData.pendingDoctors || 0,
+          transactions: statsData.transactions || "Rs. 0.00",
+          activeAppointments: statsData.activeAppointments || 0
         });
 
-        setActivities(Array.isArray(activitiesRes.data) ? activitiesRes.data : []);
+        setActivities(Array.isArray(activitiesData) ? activitiesData : []);
       } catch (error) {
-        console.error("Admin dashboard error:", error);
+        console.error("Admin dashboard fetch error:", error);
+        setMessage("Could not load admin dashboard data.");
       }
     };
 
-    fetchDashboard();
+    fetchDashboardData();
   }, []);
 
   return (
@@ -41,10 +46,12 @@ export default function AdminDashboard() {
       <h2>Admin Dashboard</h2>
       <p className="admin-subtitle">Monitor and manage the MediCare+ platform</p>
 
+      {message && <p className="admin-message">{message}</p>}
+
       <div className="admin-stats-grid">
         <div className="admin-stat-card">
           <h4>Total Users</h4>
-          <h3>{stats.totalUsers}</h3>
+          <h3 className="blue">{stats.totalUsers}</h3>
         </div>
 
         <div className="admin-stat-card">
@@ -54,7 +61,7 @@ export default function AdminDashboard() {
 
         <div className="admin-stat-card">
           <h4>Today's Transactions</h4>
-          <h3>{stats.transactions}</h3>
+          <h3 className="warning">{stats.transactions}</h3>
         </div>
 
         <div className="admin-stat-card">
