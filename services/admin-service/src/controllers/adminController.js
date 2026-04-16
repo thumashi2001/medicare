@@ -60,8 +60,8 @@ exports.getStats = async (req, res) => {
   try {
     res.json({
       totalUsers: 1254,
-      pendingDoctorVerifications: 18,
-      todaysTransactions: "Rs. 245680.00",
+      pendingDoctors: 18,
+      transactions: "Rs. 245,680.00",
       activeAppointments: 156
     });
   } catch (error) {
@@ -73,22 +73,16 @@ exports.getRecentActivities = async (req, res) => {
   try {
     res.json([
       {
-        type: "user",
-        message: "New user registered",
-        details: "saman@gmail.com",
-        time: "2 minutes ago"
+        title: "New user registered",
+        description: "saman@gmail.com • 2 minutes ago"
       },
       {
-        type: "doctor",
-        message: "Doctor verification submitted",
-        details: "Dr. Nuwan Perera",
-        time: "15 minutes ago"
+        title: "Doctor verification submitted",
+        description: "Dr. Nuwan Perera • 15 minutes ago"
       },
       {
-        type: "payment",
-        message: "Payment received",
-        details: "Rs. 3500.00",
-        time: "1 hour ago"
+        title: "Payment received",
+        description: "Rs. 3500.00 • 1 hour ago"
       }
     ]);
   } catch (error) {
