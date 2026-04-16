@@ -53,7 +53,7 @@ const PatientCheckout = ({ appointmentId, patientData }) => {
         // Prefer backend-provided notify_url (must be publicly reachable for PayHere).
         notify_url:
           data.notify_url ||
-          "https://your-ngrok-url.ngrok-free.app/api/payments/notify",
+          "https://spendable-unlit-pants.ngrok-free.dev/api/payments/notify",
         order_id: data.order_id,
         items: `Consultation: ${appointmentId}`,
         amount: String(data.amount), // FIXED
