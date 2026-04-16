@@ -8,7 +8,8 @@ const {
   uploadReport,
   getReports,
   getPrescriptions,
-  deleteReport
+  deleteReport,
+  updateProfilePhoto
 } = require("../controllers/patientController");
 
 const { protect, authorize } = require("../middleware/authMiddleware");
@@ -18,7 +19,7 @@ const upload = require("../config/upload");
 router.post("/profile", protect, authorize("patient"), createProfile);
 router.get("/profile", protect, authorize("patient"), getProfile);
 router.put("/profile", protect, authorize("patient"), updateProfile);
-
+router.put("/profile/photo", protect, authorize("patient"), upload.single("photo"), updateProfilePhoto);
 router.post("/upload", protect, authorize("patient"), upload.single("report"), uploadReport);
 router.get("/reports", protect, authorize("patient"), getReports);
 router.delete("/reports/:reportId", protect, authorize("patient"), deleteReport);

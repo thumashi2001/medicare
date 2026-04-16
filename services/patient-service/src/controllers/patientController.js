@@ -70,6 +70,32 @@ exports.updateProfile = async (req, res) => {
   }
 };
 
+//Update profile photo
+exports.updateProfilePhoto = async (req, res) => {
+  try {
+    const patient = await Patient.findOne({ userId: req.user.id });
+
+    if (!patient) {
+      return res.status(404).json({ message: "Patient not found" });
+    }
+
+    if (!req.file) {
+      return res.status(400).json({ message: "No file uploaded" });
+    }
+
+    patient.profileImage = req.file.path;
+    await patient.save();
+
+    res.json({
+      message: "Profile photo updated",
+      profileImage: patient.profileImage
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 // UPLOAD report
 exports.uploadReport = async (req, res) => {
   try {

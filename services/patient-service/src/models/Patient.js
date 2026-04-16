@@ -7,26 +7,38 @@ const patientSchema = new mongoose.Schema(
       required: true,
       unique: true
     },
+
     fullName: {
       type: String,
       default: ""
     },
+
     email: {
       type: String,
       default: ""
     },
+
     phone: {
       type: String,
       default: ""
     },
+
     dob: {
       type: String,
       default: ""
     },
+
     address: {
       type: String,
       default: ""
     },
+
+    //  (Profile Image)
+    profileImage: {
+      type: String,
+      default: ""
+    },
+
     reports: [
       {
         filePath: String,
@@ -37,6 +49,7 @@ const patientSchema = new mongoose.Schema(
         }
       }
     ],
+
     prescriptions: [
       {
         doctor: String,
