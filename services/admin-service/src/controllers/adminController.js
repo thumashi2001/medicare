@@ -37,6 +37,28 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+exports.searchUsers = async (req, res) => {
+  try {
+    const search = req.query.q?.toLowerCase() || "";
+
+    const response = await axios.get("http://localhost:5001/api/auth/users", {
+      headers: {
+        Authorization: req.headers.authorization
+      }
+    });
+
+    const filteredUsers = response.data.filter((user) =>
+      user.name?.toLowerCase().includes(search) ||
+      user.fullName?.toLowerCase().includes(search) ||
+      user.email?.toLowerCase().includes(search)
+    );
+
+    res.json(filteredUsers);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to search users" });
+  }
+};
+
 //verify doctor
 exports.verifyDoctor = async (req, res) => {
     try {

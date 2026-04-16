@@ -4,6 +4,7 @@ import "./adminDoctorVerification.css";
 
 export default function AdminDoctorVerification() {
   const [pendingDoctors, setPendingDoctors] = useState([]);
+  const [message, setMessage] = useState("");
 
   const fetchPendingDoctors = async () => {
     try {
@@ -11,6 +12,7 @@ export default function AdminDoctorVerification() {
       setPendingDoctors(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       console.error("Pending doctors error:", error);
+      setMessage("Failed to load pending doctors.");
     }
   };
 
@@ -21,18 +23,22 @@ export default function AdminDoctorVerification() {
   const handleVerify = async (id) => {
     try {
       await adminAPI.put(`/verify-doctor/${id}`);
+      setMessage("Doctor verified successfully.");
       fetchPendingDoctors();
     } catch (error) {
       console.error("Verify doctor error:", error);
+      setMessage("Failed to verify doctor.");
     }
   };
 
   const handleReject = async (id) => {
     try {
       await adminAPI.put(`/reject-doctor/${id}`);
+      setMessage("Doctor rejected successfully.");
       fetchPendingDoctors();
     } catch (error) {
       console.error("Reject doctor error:", error);
+      setMessage("Failed to reject doctor.");
     }
   };
 
@@ -40,6 +46,8 @@ export default function AdminDoctorVerification() {
     <div className="doctor-verification-page">
       <h2>Doctor Verification</h2>
       <p>Review and verify doctor registrations</p>
+
+      {message && <p className="doctor-message">{message}</p>}
 
       <div className="doctor-table-card">
         <table className="doctor-table">
@@ -52,11 +60,12 @@ export default function AdminDoctorVerification() {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {pendingDoctors.length > 0 ? (
               pendingDoctors.map((doctor) => (
                 <tr key={doctor._id}>
-                  <td>{doctor.name}</td>
+                  <td>{doctor.name || doctor.fullName || "N/A"}</td>
                   <td>{doctor.specialty || "General"}</td>
                   <td>
                     {doctor.createdAt
@@ -65,10 +74,19 @@ export default function AdminDoctorVerification() {
                   </td>
                   <td>{doctor.documentsCount || "N/A"}</td>
                   <td className="doctor-actions">
-                    <button className="verify-btn" onClick={() => handleVerify(doctor._id)}>
+                    <button
+                      className="verify-btn"
+                      type="button"
+                      onClick={() => handleVerify(doctor._id)}
+                    >
                       Verify
                     </button>
-                    <button className="reject-btn" onClick={() => handleReject(doctor._id)}>
+
+                    <button
+                      className="reject-btn"
+                      type="button"
+                      onClick={() => handleReject(doctor._id)}
+                    >
                       Reject
                     </button>
                   </td>
