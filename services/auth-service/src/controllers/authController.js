@@ -98,8 +98,6 @@ exports.verifyDoctor = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-<<<<<<< HEAD
-=======
 };
 
 exports.getPendingDoctors = async (req, res) => {
@@ -144,5 +142,4 @@ exports.rejectDoctor = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
->>>>>>> origin/feature/appointment-service
 };

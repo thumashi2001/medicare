@@ -12,15 +12,11 @@ const userSchema = new mongoose.Schema({
     isVerified: {
         type: Boolean,
         default: false
-<<<<<<< HEAD
-    }
-=======
     },
     rejected: {
         type: Boolean,
         default: false
     },
->>>>>>> origin/feature/appointment-service
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);
