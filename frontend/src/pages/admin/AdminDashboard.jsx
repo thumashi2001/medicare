@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import adminAPI from "../../api/adminApi";
 import "./adminDashboard.css";
+import { useNavigate } from "react-router-dom";
 
 export default function AdminDashboard() {
+  const navigate = useNavigate();
+
   const [stats, setStats] = useState({
     totalUsers: 0,
     pendingDoctors: 0,
@@ -90,9 +93,27 @@ export default function AdminDashboard() {
 
         <div className="admin-panel quick-actions">
           <h3>Quick Actions</h3>
-          <button type="button">Manage Users</button>
-          <button type="button">Verify Doctors</button>
-          <button type="button">View Transactions</button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/users")}
+          >
+            Manage Users
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/doctor-verification")}
+          >
+            Verify Doctors
+          </button>
+
+          <button
+            type="button"
+            onClick={() => navigate("/admin/transactions")}
+          >
+            View Transactions
+          </button>
         </div>
       </div>
     </div>
