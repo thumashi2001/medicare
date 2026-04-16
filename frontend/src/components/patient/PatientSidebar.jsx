@@ -1,10 +1,13 @@
 import { NavLink } from "react-router-dom";
 import "./patientSidebar.css";
+import logo from "../../assets/logo/500x90-logo-tp.png";
 
 export default function PatientSidebar() {
   return (
     <aside className="patient-sidebar">
-      <div className="brand">MediCare+</div>
+      <div className="logo-container">
+        <img src={logo} alt="MediCare Logo" className="logo-img" />
+      </div>
 
       <nav className="patient-nav">
         <NavLink to="/patient/dashboard">Dashboard</NavLink>
