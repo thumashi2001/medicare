@@ -54,20 +54,40 @@
 .reports-table td {
   padding: 14px;
   border-bottom: 1px solid #e0e0e0;
+  color: #2c3e50;
 }
 
-.actions-cell {
+.actions {
   display: flex;
   gap: 10px;
+  align-items: center;
 }
 
 .icon-btn {
   border: none;
   background: transparent;
   cursor: pointer;
-  font-size: 16px;
+  padding: 8px;
+  border-radius: 8px;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.icon-btn.download {
+  color: #3498db;
+}
+
+.icon-btn.download:hover {
+  background: #eaf4fc;
 }
 
 .icon-btn.delete {
   color: #e74c3c;
+}
+
+.icon-btn.delete:hover {
+  background: #fdecea;
 }

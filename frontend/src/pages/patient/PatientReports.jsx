@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import API from "../../api/axios";
 import "./patientReports.css";
+import { FiDownload, FiTrash2 } from "react-icons/fi";
 
 export default function PatientReports() {
   const [reports, setReports] = useState([]);
@@ -59,6 +60,7 @@ export default function PatientReports() {
       setMessage("Failed to upload report");
     } finally {
       setUploading(false);
+      e.target.value = "";
     }
   };
 
@@ -73,6 +75,11 @@ export default function PatientReports() {
   };
 
   const handleDelete = async (reportId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this report?"
+    );
+    if (!confirmed) return;
+
     try {
       await API.delete(`/patients/reports/${reportId}`);
       setMessage("Report deleted successfully");
@@ -121,22 +128,23 @@ export default function PatientReports() {
                   <td>{report.name}</td>
                   <td>{report.uploadDate}</td>
                   <td>{report.doctor}</td>
-                  <td className="actions-cell">
+                  <td className="actions">
                     <button
-                      className="icon-btn"
+                      className="icon-btn download"
                       type="button"
                       onClick={() => handleDownload(report.filePath)}
-                      title="Download"
+                      title="Download Report"
                     >
-                      ⬇
+                      <FiDownload />
                     </button>
+
                     <button
                       className="icon-btn delete"
                       type="button"
                       onClick={() => handleDelete(report.id)}
-                      title="Delete"
+                      title="Delete Report"
                     >
-                      🗑
+                      <FiTrash2 />
                     </button>
                   </td>
                 </tr>

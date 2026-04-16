@@ -12,10 +12,12 @@ export default function PatientProfile() {
     profileImage: ""
   });
 
+  const [originalProfile, setOriginalProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [message, setMessage] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -23,14 +25,17 @@ export default function PatientProfile() {
         const res = await API.get("/patients/profile");
         const data = res.data || {};
 
-        setProfile({
+        const formattedProfile = {
           fullName: data.fullName || "",
           email: data.email || "",
           phone: data.phone || "",
           dob: data.dob || "",
           address: data.address || "",
           profileImage: data.profileImage || ""
-        });
+        };
+
+        setProfile(formattedProfile);
+        setOriginalProfile(formattedProfile);
 
         if (data.fullName) {
           localStorage.setItem("name", data.fullName);
@@ -54,6 +59,19 @@ export default function PatientProfile() {
     }));
   };
 
+  const handleEdit = () => {
+    setMessage("");
+    setIsEditing(true);
+  };
+
+  const handleCancel = () => {
+    if (originalProfile) {
+      setProfile(originalProfile);
+    }
+    setMessage("");
+    setIsEditing(false);
+  };
+
   const handleUpdate = async () => {
     try {
       setSaving(true);
@@ -67,8 +85,14 @@ export default function PatientProfile() {
         address: profile.address
       });
 
+      const updatedProfile = {
+        ...profile
+      };
+
+      setOriginalProfile(updatedProfile);
       setMessage(res.data.message || "Profile updated successfully");
       localStorage.setItem("name", profile.fullName);
+      setIsEditing(false);
     } catch (error) {
       console.error("Profile update error:", error);
       setMessage("Failed to update profile");
@@ -94,11 +118,16 @@ export default function PatientProfile() {
         }
       });
 
-      setProfile((prev) => ({
+      const updatedProfile = {
+        ...profile,
+        profileImage: res.data.profileImage
+      };
+
+      setProfile(updatedProfile);
+      setOriginalProfile((prev) => ({
         ...prev,
         profileImage: res.data.profileImage
       }));
-
       setMessage(res.data.message || "Profile photo updated successfully");
     } catch (error) {
       console.error("Photo upload error:", error);
@@ -166,6 +195,7 @@ export default function PatientProfile() {
               name="fullName"
               value={profile.fullName}
               onChange={handleChange}
+              disabled={!isEditing}
             />
           </div>
 
@@ -176,6 +206,7 @@ export default function PatientProfile() {
               name="email"
               value={profile.email}
               onChange={handleChange}
+              disabled={!isEditing}
             />
           </div>
 
@@ -186,6 +217,7 @@ export default function PatientProfile() {
               name="phone"
               value={profile.phone}
               onChange={handleChange}
+              disabled={!isEditing}
             />
           </div>
 
@@ -197,6 +229,7 @@ export default function PatientProfile() {
                 name="dob"
                 value={profile.dob}
                 onChange={handleChange}
+                disabled={!isEditing}
               />
             </div>
 
@@ -207,18 +240,41 @@ export default function PatientProfile() {
                 name="address"
                 value={profile.address}
                 onChange={handleChange}
+                disabled={!isEditing}
               />
             </div>
           </div>
 
-          <button
-            className="update-btn"
-            type="button"
-            onClick={handleUpdate}
-            disabled={saving}
-          >
-            {saving ? "Updating..." : "Update Profile"}
-          </button>
+          <div className="profile-actions">
+            {!isEditing ? (
+              <button
+                className="update-btn"
+                type="button"
+                onClick={handleEdit}
+              >
+                Edit Profile
+              </button>
+            ) : (
+              <>
+                <button
+                  className="update-btn"
+                  type="button"
+                  onClick={handleUpdate}
+                  disabled={saving}
+                >
+                  {saving ? "Saving..." : "Save Changes"}
+                </button>
+
+                <button
+                  className="cancel-btn"
+                  type="button"
+                  onClick={handleCancel}
+                >
+                  Cancel
+                </button>
+              </>
+            )}
+          </div>
         </div>
       </div>
     </div>
