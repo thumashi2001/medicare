@@ -35,7 +35,7 @@ export default function PatientDashboard() {
         });
 
         const mappedReports = reports
-          .slice(-2)
+          .slice(-3)
           .reverse()
           .map((report, index) => ({
             id: report._id || index,
@@ -65,42 +65,44 @@ export default function PatientDashboard() {
         <p>Manage your health and appointments</p>
       </div>
 
-      {message && (
-        <p style={{ color: "#e67e22", fontWeight: "600", marginTop: "10px" }}>
-          {message}
-        </p>
-      )}
+      {message && <p className="dashboard-message">{message}</p>}
 
       <div className="summary-grid">
         <div className="summary-card">
-          <h2 style={{ color: "#3498DB" }}>{stats.upcoming}</h2>
+          <h2 className="summary-blue">{stats.upcoming}</h2>
           <p>Upcoming</p>
         </div>
 
         <div className="summary-card">
-          <h2 style={{ color: "#27AE60" }}>{stats.completed}</h2>
+          <h2 className="summary-green">{stats.completed}</h2>
           <p>Completed</p>
         </div>
 
         <div className="summary-card">
-          <h2 style={{ color: "#F39C12" }}>{stats.reports}</h2>
+          <h2 className="summary-orange">{stats.reports}</h2>
           <p>Reports</p>
         </div>
 
         <div className="summary-card">
-          <h2 style={{ color: "#E74C3C" }}>{stats.prescriptions}</h2>
+          <h2 className="summary-red">{stats.prescriptions}</h2>
           <p>Prescriptions</p>
         </div>
       </div>
 
       <div className="dashboard-section">
         <h3>Upcoming Appointment</h3>
+
         <div className="appointment-card">
-          <div>
-            <h4>Dr. Kavinda Silva</h4>
-            <p>Cardiologist</p>
-            <span>Tomorrow • 10:30 AM</span>
+          <div className="appointment-left">
+            <div className="doctor-avatar">D</div>
+
+            <div className="appointment-info">
+              <h4>Dr. Kavinda Silva</h4>
+              <p>Cardiologist</p>
+              <span>Tomorrow • 10:30 AM</span>
+            </div>
           </div>
+
           <button type="button">View Details</button>
         </div>
       </div>
@@ -114,14 +116,16 @@ export default function PatientDashboard() {
         {recentReports.length > 0 ? (
           recentReports.map((report) => (
             <div className="report-item" key={report.id}>
-              <div>
+              <div className="report-text">
                 <strong>{report.name}</strong>
                 <p>Uploaded on {report.uploadedAt}</p>
               </div>
             </div>
           ))
         ) : (
-          <p>No recent reports found</p>
+          <div className="empty-state">
+            <p>No recent reports found</p>
+          </div>
         )}
       </div>
     </div>
