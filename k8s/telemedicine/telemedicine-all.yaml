@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tele-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: telemedicine
+  template:
+    metadata:
+      labels:
+        app: telemedicine
+    spec:
+      containers:
+      - name: tele-api
+        image: yasanjith365/medicare-telemedicine:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: PORT
+          value: "5000"
+        - name: APP_ID
+          valueFrom:
+            secretKeyRef:
+              name: tele-secrets
+              key: APP_ID
+        - name: APP_CERTIFICATE
+          valueFrom:
+            secretKeyRef:
+              name: tele-secrets
+              key: APP_CERTIFICATE
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: telemedicine-service
+spec:
+  type: LoadBalancer  # Allows your React app to find this at localhost:5000
+  selector:
+    app: telemedicine
+  ports:
+    - protocol: TCP
+      port: 5000       # Port the outside world (browser) uses
+      targetPort: 5000 # Port the Node.js app inside the container uses

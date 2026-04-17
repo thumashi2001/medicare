@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment
+  template:
+    metadata:
+      labels:
+        app: payment
+    spec:
+      containers:
+        - name: payment-api
+          image: yasanjith365/medicare-payment:latest
+          ports:
+            - containerPort: 5007
+          env:
+            - name: PORT
+              value: "5007"
+            - name: PAYHERE_SANDBOX
+              value: "true"
+            - name: PAYHERE_MERCHANT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYHERE_MERCHANT_ID
+            - name: PAYHERE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYHERE_SECRET
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: MONGO_URI
+            - name: PAYHERE_NOTIFY_URL
+              valueFrom:
+                secretKeyRef:
+                  name: payment-secrets
+                  key: PAYHERE_NOTIFY_URL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-service
+spec:
+  type: LoadBalancer
+  selector:
+    app: payment
+  ports:
+    - protocol: TCP
+      port: 5007
+      targetPort: 5007
