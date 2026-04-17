@@ -1,6 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import DoctorDashboard from "./pages/DoctorDashboard";
+import AdminDashboard from "./pages/AdminDashboard";
+import PaymentPage from "./pages/PaymentPage";
 
 import DoctorLayout from "./components/DoctorLayout";
 import DoctorHome from "./pages/doctor/DoctorHome";
@@ -21,6 +24,8 @@ import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHistory from "./pages/patient/PatientHistory";
 import PatientLogout from "./pages/patient/PatientLogout";
 
+import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
+import NotificationsPanel from "./components/notifications/NotificationsPanel";
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -48,6 +53,7 @@ function ProtectedRoute({ children, allowedRole }) {
 function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
   if (role === "patient") return "/patient/dashboard";
+  if (role === "admin") return "/admin";
   if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
@@ -61,6 +67,7 @@ export default function App() {
       <Route
         path="/"
         element={
+          token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
           token ? (
             <Navigate to={getDashboardRoute(role)} replace />
           ) : (
@@ -72,10 +79,24 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
+      {/* Payment page — accessible outside the patient layout */}
+      <Route
+        path="/payment"
+        element={
+          <ProtectedRoute allowedRole="patient">
+            <PaymentPage />
+          </ProtectedRoute>
+        }
+      />
+
       <Route
         path="/doctor"
         element={
           <ProtectedRoute allowedRole="doctor">
+            <DoctorDashboard />
+          </ProtectedRoute>
+        }
+      />
             <DoctorLayout />
           </ProtectedRoute>
         }
@@ -92,6 +113,10 @@ export default function App() {
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
             <AdminLayout />
           </ProtectedRoute>
         }
@@ -117,6 +142,8 @@ export default function App() {
         <Route path="dashboard" element={<PatientDashboard />} />
         <Route path="profile" element={<PatientProfile />} />
         <Route path="appointments" element={<PatientAppointments />} />
+        <Route path="find-doctors" element={<FindDoctorsPage />} />
+        <Route path="notifications" element={<NotificationsPanel />} />
         <Route path="reports" element={<PatientReports />} />
         <Route path="prescriptions" element={<PatientPrescriptions />} />
         <Route path="history" element={<PatientHistory />} />

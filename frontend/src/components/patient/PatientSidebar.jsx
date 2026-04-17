@@ -13,6 +13,8 @@ export default function PatientSidebar() {
         <NavLink to="/patient/dashboard">Dashboard</NavLink>
         <NavLink to="/patient/profile">My Profile</NavLink>
         <NavLink to="/patient/appointments">Appointments</NavLink>
+        <NavLink to="/patient/find-doctors">Find Doctors</NavLink>
+        <NavLink to="/patient/notifications">Notifications</NavLink>
         <NavLink to="/patient/reports">Medical Reports</NavLink>
         <NavLink to="/patient/prescriptions">Prescriptions</NavLink>
         <NavLink to="/patient/history">Health History</NavLink>

@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 
 const {
+    getUsers,
+    deleteUser,
+    verifyDoctor
   getUsers,
   deleteUser,
   verifyDoctor,
@@ -15,6 +18,7 @@ const {
 
 const { protect, authorize } = require("../middleware/authmiddleware");
 
+//Only admin can access
 // Only admin can access
 router.get("/users", protect, authorize("admin"), getUsers);
 
