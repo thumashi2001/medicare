@@ -1,7 +1,3 @@
-import MyAppointmentsDashboard from "../../components/appointments/MyAppointmentsDashboard";
-
-export default function PatientAppointments() {
-  return <MyAppointmentsDashboard />;
 import "./patientAppointments.css";
 
 export default function PatientAppointments() {
