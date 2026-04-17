@@ -14,14 +14,14 @@ app.use(express.json());
 app.get("/", (req, res) => {
     res.json({
         success: true,
-        message: "Appointment & Notification Service is running on port 5003"
+        message: "Appointment & Notification Service is running on port 5005"
     });
 });
 
 app.use("/api/appointments", require("./src/routes/appointmentRoutes"));
 app.use("/api/notifications", require("./src/routes/notificationRoutes"));
 
-const PORT = process.env.PORT || 5003;
+const PORT = process.env.PORT || 5005;
 
 app.listen(PORT, () => {
     console.log(`Appointment Service running on port ${PORT}`);

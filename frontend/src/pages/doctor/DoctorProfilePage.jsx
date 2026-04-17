@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const DOCTOR_API = "http://localhost:5002";
+const DOCTOR_API = "http://localhost:5003";
 
 export default function DoctorProfilePage() {
   const token = localStorage.getItem("token");
 
   const [formData, setFormData] = useState({
+    name: "",
     specialization: "",
     hospital: "",
     experience: "",
@@ -34,6 +35,7 @@ export default function DoctorProfilePage() {
       const response = await axios.get(`${DOCTOR_API}/api/doctors/profile/me`, { headers: authHeaders });
       const profile = response.data.data;
       setFormData({
+        name: profile.name || "",
         specialization: profile.specialization || "",
         hospital: profile.hospital || "",
         experience: profile.experience ?? "",
@@ -98,6 +100,11 @@ export default function DoctorProfilePage() {
 
       <div style={styles.card}>
         <form onSubmit={handleSubmit} style={styles.formGrid}>
+          <div style={styles.fieldFull}>
+            <label style={styles.label}>Display Name <span style={{color:"#e74c3c"}}>*</span></label>
+            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Dr. Kavinda Silva" style={styles.input} required />
+            <span style={styles.hint}>This is the name patients see when searching for doctors.</span>
+          </div>
           <div style={styles.field}>
             <label style={styles.label}>Specialization</label>
             <input type="text" name="specialization" value={formData.specialization} onChange={handleChange} placeholder="Cardiologist" style={styles.input} required />
@@ -151,6 +158,7 @@ const styles = {
   formGrid: { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: "18px" },
   field: { display: "flex", flexDirection: "column", gap: "8px" },
   fieldFull: { gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: "8px" },
+  hint: { fontSize: "12px", color: "#8fa3b8" },
   label: { fontSize: "14px", fontWeight: "600", color: "#334155" },
   input: { width: "100%", padding: "14px 16px", borderRadius: "14px", border: "1px solid #dbe3ec", background: "#fbfdff", fontSize: "15px", outline: "none" },
   textarea: { width: "100%", padding: "14px 16px", borderRadius: "14px", border: "1px solid #dbe3ec", background: "#fbfdff", fontSize: "15px", outline: "none", resize: "vertical", fontFamily: "inherit" },

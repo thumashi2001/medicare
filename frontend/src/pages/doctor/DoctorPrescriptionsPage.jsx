@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const DOCTOR_API = "http://localhost:5002";
+const DOCTOR_API = "http://localhost:5003";
 
 export default function DoctorPrescriptionsPage() {
   const token = localStorage.getItem("token");

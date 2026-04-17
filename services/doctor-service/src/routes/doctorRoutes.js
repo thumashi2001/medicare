@@ -2,6 +2,8 @@ const express = require("express");
 const router = express.Router();
 const {
     getHealth,
+    getAllDoctors,
+    getDoctorAvailability,
     createDoctorProfile,
     getMyDoctorProfile,
     updateMyDoctorProfile,
@@ -21,6 +23,8 @@ const {
 const { protect, authorize } = require("../middleware/authMiddleware");
 
 router.get("/health", getHealth);
+router.get("/", getAllDoctors);  // Public — list all doctors for patient booking
+router.get("/:doctorId/availability", getDoctorAvailability);  // Public — get a doctor's available slots
 
 router.post("/profile", protect, authorize("doctor"), createDoctorProfile);
 router.get("/profile/me", protect, authorize("doctor"), getMyDoctorProfile);

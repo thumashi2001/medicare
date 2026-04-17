@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-const DOCTOR_API = "http://localhost:5002";
+const DOCTOR_API = "http://localhost:5003";
 
 const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
 const modes = ["online", "physical", "both"];
@@ -50,6 +50,35 @@ export default function DoctorAvailabilityPage() {
     setSaving(true);
     setError("");
     setMessage("");
+
+    // Frontend validation
+    const toMins = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+
+    if (!formData.startTime || !formData.endTime) {
+      setError("Please select both start time and end time.");
+      setSaving(false);
+      return;
+    }
+
+    if (toMins(formData.endTime) <= toMins(formData.startTime)) {
+      setError("End time must be after start time.");
+      setSaving(false);
+      return;
+    }
+
+    const newStart = toMins(formData.startTime);
+    const newEnd   = toMins(formData.endTime);
+    const overlap  = slots.find((s) =>
+      s.dayOfWeek === formData.dayOfWeek &&
+      newStart < toMins(s.endTime) &&
+      newEnd   > toMins(s.startTime)
+    );
+    if (overlap) {
+      setError(`This slot overlaps with an existing slot on ${formData.dayOfWeek} (${overlap.startTime} – ${overlap.endTime}).`);
+      setSaving(false);
+      return;
+    }
+
     try {
       await axios.post(`${DOCTOR_API}/api/doctors/availability`, formData, {
         headers: { ...authHeaders, "Content-Type": "application/json" }
