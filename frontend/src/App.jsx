@@ -22,7 +22,18 @@ const App = () => {
         <nav className="p-4 bg-[#2C3E50] text-white flex justify-between items-center shadow-md">
           <div className="font-bold text-[#2ECC71] tracking-tighter text-xl">✚ SMART HEALTH</div>
           <div className="flex gap-6 text-xs uppercase tracking-widest font-bold items-center">
-            <Link to="/" className="hover:text-[#2ECC71] transition-colors">Admin</Link>
+            <Link to="/" className="hover:text-[#2ECC71] transition-colors">
+              Admin
+            </Link>
+            
+            {/* Added Telemedicine Button */}
+            <Link 
+              to="/telemedicine" 
+              className="hover:text-[#2ECC71] transition-colors border-l border-gray-600 pl-6"
+            >
+              Telemedicine
+            </Link>
+
             <Link 
               to="/pay" 
               className="bg-[#F39C12] px-4 py-2 rounded-lg hover:bg-[#e67e22] transition-all shadow-md"
@@ -36,6 +47,12 @@ const App = () => {
         <Routes>
           <Route path="/" element={<AdminPaymentDashboard />} />
           
+          {/* Placeholder for Telemedicine Route */}
+          <Route 
+            path="/telemedicine" 
+            element={<div className="p-10 text-center">Telemedicine Module Coming Soon...</div>} 
+          />
+
           <Route 
             path="/pay" 
             element={
