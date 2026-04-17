@@ -1,153 +1,74 @@
 const axios = require("axios");
 
 exports.getUsers = async (req, res) => {
-    try {
-        const response = await axios.get(
-            "http://localhost:5001/api/auth/users",
-            {
-                headers: {
-                    Authorization: req.headers.authorization
-                }
-            }
-        );
+  try {
+    const response = await axios.get(
+      "http://localhost:5001/api/auth/users",
+      {
+        headers: {
+          Authorization: req.headers.authorization
+        }
+      }
+    );
 
-        res.json(response.data);
-    } catch (error) {
-        console.error("ADMIN ERROR:", error.message);
-        res.status(500).json({ message: "Failed to fetch users" });
-    }
+    res.json(response.data);
+  } catch (error) {
+    console.error("ADMIN ERROR:", error.message);
+    res.status(500).json({ message: "Failed to fetch users" });
+  }
 };
 
-//delete user
 exports.deleteUser = async (req, res) => {
-    try {
-        const response = await axios.delete(
-            `http://localhost:5001/api/auth/users/${req.params.id}`,
-            {
-                headers: {
-                    Authorization: req.headers.authorization
-                }
-            }
-        );
-
-        res.json(response.data);
-    } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: "Failed to delete user" });
-    }
-};
-
-exports.searchUsers = async (req, res) => {
   try {
-    const search = req.query.q?.toLowerCase() || "";
-
-    const response = await axios.get("http://localhost:5001/api/auth/users", {
-      headers: {
-        Authorization: req.headers.authorization
+    const response = await axios.delete(
+      `http://localhost:5001/api/auth/users/${req.params.id}`,
+      {
+        headers: {
+          Authorization: req.headers.authorization
+        }
       }
-    });
-
-    const filteredUsers = response.data.filter((user) =>
-      user.name?.toLowerCase().includes(search) ||
-      user.fullName?.toLowerCase().includes(search) ||
-      user.email?.toLowerCase().includes(search)
     );
 
-    res.json(filteredUsers);
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ message: "Failed to search users" });
+    console.error(error.message);
+    res.status(500).json({ message: "Failed to delete user" });
   }
 };
 
-//verify doctor
 exports.verifyDoctor = async (req, res) => {
-    try {
-        const response = await axios.put(
-            `http://localhost:5001/api/auth/verify-doctor/${req.params.id}`,
-            {},
-            {
-                headers: {
-                    Authorization: req.headers.authorization
-                }
-            }
-        );
-
-        res.json(response.data);
-    } catch (error) {
-        res.status(500).json({ message: "Failed to verify doctor" });
-    }
-};
-
-exports.getStats = async (req, res) => {
   try {
-    res.json({
-      totalUsers: 1254,
-      pendingDoctorVerifications: 18,
-      todaysTransactions: "Rs. 245680.00",
-      pendingDoctors: 18,
-      transactions: "Rs. 245,680.00",
-      activeAppointments: 156
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.getRecentActivities = async (req, res) => {
-  try {
-    res.json([
+    const response = await axios.put(
+      `http://localhost:5001/api/auth/verify-doctor/${req.params.id}`,
+      {},
       {
-        type: "user",
-        message: "New user registered",
-        details: "saman@gmail.com",
-        time: "2 minutes ago"
-      },
-      {
-        type: "doctor",
-        message: "Doctor verification submitted",
-        details: "Dr. Nuwan Perera",
-        time: "15 minutes ago"
-      },
-      {
-        type: "payment",
-        message: "Payment received",
-        details: "Rs. 3500.00",
-        time: "1 hour ago"
-        title: "New user registered",
-        description: "saman@gmail.com • 2 minutes ago"
-      },
-      {
-        title: "Doctor verification submitted",
-        description: "Dr. Nuwan Perera • 15 minutes ago"
-      },
-      {
-        title: "Payment received",
-        description: "Rs. 3500.00 • 1 hour ago"
+        headers: {
+          Authorization: req.headers.authorization
+        }
       }
-    ]);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-exports.searchUsers = async (req, res) => {
-  try {
-    const search = req.query.q?.toLowerCase() || "";
-
-    const response = await axios.get("http://localhost:5001/api/auth/users", {
-      headers: {
-        Authorization: req.headers.authorization
-      }
-    });
-
-    const filteredUsers = response.data.filter((user) =>
-      user.name?.toLowerCase().includes(search) ||
-      user.email?.toLowerCase().includes(search)
     );
 
-    res.json(filteredUsers);
+    res.json(response.data);
   } catch (error) {
-    res.status(500).json({ message: "Failed to search users" });
+    res.status(500).json({ message: "Failed to verify doctor" });
+  }
+};
+
+exports.rejectDoctor = async (req, res) => {
+  try {
+    const response = await axios.put(
+      `http://localhost:5001/api/auth/reject-doctor/${req.params.id}`,
+      {},
+      {
+        headers: {
+          Authorization: req.headers.authorization
+        }
+      }
+    );
+
+    res.json(response.data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to reject doctor" });
   }
 };
 
@@ -185,11 +106,46 @@ exports.getVerifiedDoctors = async (req, res) => {
   }
 };
 
-exports.rejectDoctor = async (req, res) => {
+exports.getStats = async (req, res) => {
   try {
-    const response = await axios.put(
-      `http://localhost:5001/api/auth/reject-doctor/${req.params.id}`,
-      {},
+    res.json({
+      totalUsers: 1254,
+      pendingDoctors: 18,
+      transactions: "Rs. 245,680.00",
+      activeAppointments: 156
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getRecentActivities = async (req, res) => {
+  try {
+    res.json([
+      {
+        title: "New user registered",
+        description: "saman@gmail.com • 2 minutes ago"
+      },
+      {
+        title: "Doctor verification submitted",
+        description: "Dr. Nuwan Perera • 15 minutes ago"
+      },
+      {
+        title: "Payment received",
+        description: "Rs. 3500.00 • 1 hour ago"
+      }
+    ]);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.searchUsers = async (req, res) => {
+  try {
+    const search = req.query.q?.toLowerCase() || "";
+
+    const response = await axios.get(
+      "http://localhost:5001/api/auth/users",
       {
         headers: {
           Authorization: req.headers.authorization
@@ -197,8 +153,13 @@ exports.rejectDoctor = async (req, res) => {
       }
     );
 
-    res.json(response.data);
+    const filteredUsers = response.data.filter((user) =>
+      (user.name || user.fullName || "").toLowerCase().includes(search) ||
+      (user.email || "").toLowerCase().includes(search)
+    );
+
+    res.json(filteredUsers);
   } catch (error) {
-    res.status(500).json({ message: "Failed to reject doctor" });
+    res.status(500).json({ message: "Failed to search users" });
   }
 };

@@ -1,16 +1,55 @@
-import { useState } from "react";
+﻿import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import { createAppointment, getPatientIdFromToken } from "../../services/appointmentApi";
 
-const TIME_SLOTS = [
-  "08:00 AM", "08:30 AM", "09:00 AM", "09:30 AM",
-  "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-  "01:00 PM", "01:30 PM", "02:00 PM", "02:30 PM",
-  "03:00 PM", "03:30 PM", "04:00 PM", "04:30 PM",
-];
-
-// Minimum date = today
+const DOCTOR_API = "http://localhost:5003";
 const todayISO = new Date().toISOString().split("T")[0];
+
+const getNameFromToken = () => {
+  try {
+    const token = localStorage.getItem("token");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.name || "";
+  } catch {
+    return "";
+  }
+};
+
+// "HH:MM" 24h â†’ "08:30 AM"
+const to12h = (time24) => {
+  const [hStr, mStr] = time24.split(":");
+  let h = parseInt(hStr, 10);
+  const m = mStr || "00";
+  const ampm = h >= 12 ? "PM" : "AM";
+  if (h === 0) h = 12;
+  else if (h > 12) h -= 12;
+  return `${String(h).padStart(2, "0")}:${m} ${ampm}`;
+};
+
+// Generate 30-minute slots between startTime and endTime ("HH:MM" strings)
+const generateSlots = (startTime, endTime) => {
+  const slots = [];
+  const [sh, sm] = startTime.split(":").map(Number);
+  const [eh, em] = endTime.split(":").map(Number);
+  let cur = sh * 60 + sm;
+  const end = eh * 60 + em;
+  while (cur + 30 <= end) {
+    const h = Math.floor(cur / 60);
+    const m = cur % 60;
+    slots.push(to12h(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`));
+    cur += 30;
+  }
+  return slots;
+};
+
+// "YYYY-MM-DD" â†’ day name e.g. "Monday"
+const getDayName = (dateStr) => {
+  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  // Parse as local date to avoid timezone shift
+  const [y, mo, d] = dateStr.split("-").map(Number);
+  return days[new Date(y, mo - 1, d).getDay()];
+};
 
 export default function BookingModal({ doctor, onClose }) {
   const navigate = useNavigate();
@@ -19,48 +58,81 @@ export default function BookingModal({ doctor, onClose }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleConfirm = async () => {
+  // Availability fetched from doctor-service
+  const [availSlots, setAvailSlots] = useState([]);   // raw availability records
+  const [availDays, setAvailDays] = useState([]);      // ["Monday", "Wednesday", ...]
+  const [timeSlots, setTimeSlots] = useState([]);      // slots for selected date
+  const [availLoading, setAvailLoading] = useState(true);
+
+  // Fetch doctor availability on mount
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const res = await axios.get(`${DOCTOR_API}/api/doctors/${doctor._id}/availability`);
+        const data = res.data?.data || [];
+        setAvailSlots(data);
+        const days = [...new Set(data.map((s) => s.dayOfWeek))];
+        setAvailDays(days);
+      } catch {
+        // fall back silently â€” user will see "no slots" message
+      } finally {
+        setAvailLoading(false);
+      }
+    };
+    fetch();
+  }, [doctor._id]);
+
+  // Recompute time slots when date changes
+  useEffect(() => {
+    setSelectedTime("");
     if (!selectedDate) {
-      setError("Please select an appointment date.");
+      setTimeSlots([]);
       return;
     }
-    if (!selectedTime) {
-      setError("Please select a time slot.");
-      return;
-    }
+    const dayName = getDayName(selectedDate);
+    const daySlots = availSlots.filter((s) => s.dayOfWeek === dayName && s.isAvailable);
+    const generated = [];
+    daySlots.forEach((s) => {
+      generateSlots(s.startTime, s.endTime).forEach((t) => {
+        if (!generated.includes(t)) generated.push(t);
+      });
+    });
+    setTimeSlots(generated);
+  }, [selectedDate, availSlots]);
+
+  const handleConfirm = async () => {
+    if (!selectedDate) { setError("Please select an appointment date."); return; }
+    if (!selectedTime) { setError("Please select a time slot."); return; }
     setError("");
     setLoading(true);
-
     try {
       const patientId = getPatientIdFromToken();
-
+      const patientName = getNameFromToken();
       const payload = {
         patientId,
+        patientName,
         doctorId: doctor._id,
         doctorName: doctor.name,
         doctorSpecialty: doctor.specialty,
         appointmentDate: selectedDate,
         appointmentTime: selectedTime,
       };
-
       const res = await createAppointment(payload);
       const appointmentId = res.data?.data?._id;
-
-      // Redirect to payment page with appointment ID
       navigate(`/payment?apt_id=${appointmentId}`);
     } catch (err) {
-      const msg =
-        err?.response?.data?.message || "Failed to book appointment. Please try again.";
-      setError(msg);
+      setError(err?.response?.data?.message || "Failed to book appointment. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
-  // Prevent backdrop click from bubbling
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  const selectedDayName = selectedDate ? getDayName(selectedDate) : "";
+  const dateHasNoSlots = selectedDate && !availLoading && timeSlots.length === 0;
 
   return (
     <div
@@ -71,23 +143,13 @@ export default function BookingModal({ doctor, onClose }) {
         {/* Modal Header */}
         <div className="bg-green-dark px-6 py-4 flex items-center justify-between">
           <h2 className="text-white font-bold text-lg">Book Appointment</h2>
-          <button
-            onClick={onClose}
-            className="text-white/80 hover:text-white text-2xl leading-none"
-          >
-            ×
-          </button>
+          <button onClick={onClose} className="text-white/80 hover:text-white text-2xl leading-none">&times;</button>
         </div>
 
         {/* Doctor Info */}
         <div className="px-6 py-4 border-b border-gray-100 flex items-center gap-4">
           <div className="w-12 h-12 rounded-full bg-green-light flex items-center justify-center text-green-dark font-bold text-lg flex-shrink-0">
-            {doctor.name
-              .split(" ")
-              .filter((w) => w !== "Dr.")
-              .map((w) => w[0])
-              .slice(0, 2)
-              .join("")}
+            {doctor.name.split(" ").filter((w) => w !== "Dr.").map((w) => w[0]).slice(0, 2).join("")}
           </div>
           <div>
             <p className="font-semibold text-gray-800">{doctor.name}</p>
@@ -100,13 +162,28 @@ export default function BookingModal({ doctor, onClose }) {
           </div>
         </div>
 
+        {/* Available Days Info */}
+        {!availLoading && availDays.length > 0 && (
+          <div className="px-6 pt-4 pb-0">
+            <p className="text-xs text-gray-500">
+              Available on:{" "}
+              <span className="font-medium text-green-dark">{availDays.join(", ")}</span>
+            </p>
+          </div>
+        )}
+        {!availLoading && availDays.length === 0 && (
+          <div className="px-6 pt-4 pb-0">
+            <p className="text-xs text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+              This doctor has not set availability yet. Please check back later.
+            </p>
+          </div>
+        )}
+
         {/* Form */}
         <div className="px-6 py-5 space-y-5">
           {/* Date Picker */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">
-              Select Date
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Select Date</label>
             <input
               type="date"
               min={todayISO}
@@ -120,22 +197,36 @@ export default function BookingModal({ doctor, onClose }) {
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Select Time Slot
+              {selectedDayName && (
+                <span className="ml-2 text-xs font-normal text-gray-400">({selectedDayName})</span>
+              )}
             </label>
-            <div className="grid grid-cols-4 gap-2">
-              {TIME_SLOTS.map((slot) => (
-                <button
-                  key={slot}
-                  onClick={() => setSelectedTime(slot)}
-                  className={`text-xs py-2 rounded-lg border font-medium transition-colors ${
-                    selectedTime === slot
-                      ? "bg-green-primary border-green-primary text-white"
-                      : "border-gray-200 text-gray-600 hover:border-green-primary hover:text-green-dark"
-                  }`}
-                >
-                  {slot}
-                </button>
-              ))}
-            </div>
+
+            {availLoading ? (
+              <p className="text-sm text-gray-400">Loading availabilityâ€¦</p>
+            ) : !selectedDate ? (
+              <p className="text-sm text-gray-400">Please select a date first.</p>
+            ) : dateHasNoSlots ? (
+              <p className="text-sm text-amber-600 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                No slots available on {selectedDayName}. Please choose a different date.
+              </p>
+            ) : (
+              <div className="grid grid-cols-4 gap-2">
+                {timeSlots.map((slot) => (
+                  <button
+                    key={slot}
+                    onClick={() => setSelectedTime(slot)}
+                    className={`text-xs py-2 rounded-lg border font-medium transition-colors ${
+                      selectedTime === slot
+                        ? "bg-green-primary border-green-primary text-white"
+                        : "border-gray-200 text-gray-600 hover:border-green-primary hover:text-green-dark"
+                    }`}
+                  >
+                    {slot}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Error Message */}
@@ -149,11 +240,8 @@ export default function BookingModal({ doctor, onClose }) {
           {selectedDate && selectedTime && (
             <div className="bg-green-light rounded-xl p-3 text-sm text-gray-700">
               <span className="font-medium">Summary: </span>
-              {new Date(selectedDate).toLocaleDateString("en-US", {
-                weekday: "long",
-                year: "numeric",
-                month: "long",
-                day: "numeric",
+              {new Date(...selectedDate.split("-").map((v, i) => i === 1 ? Number(v) - 1 : Number(v))).toLocaleDateString("en-US", {
+                weekday: "long", year: "numeric", month: "long", day: "numeric",
               })}{" "}
               at {selectedTime}
             </div>
@@ -171,7 +259,7 @@ export default function BookingModal({ doctor, onClose }) {
           </button>
           <button
             onClick={handleConfirm}
-            disabled={loading}
+            disabled={loading || availDays.length === 0}
             className="flex-1 bg-green-primary hover:bg-green-dark text-white font-semibold py-2.5 rounded-xl transition-colors text-sm flex items-center justify-center gap-2 disabled:opacity-60"
           >
             {loading ? (
@@ -180,7 +268,7 @@ export default function BookingModal({ doctor, onClose }) {
                 Booking...
               </>
             ) : (
-              "Confirm Booking →"
+              <>Confirm Booking &#8594;</>
             )}
           </button>
         </div>

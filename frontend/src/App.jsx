@@ -12,6 +12,7 @@ import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
 import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
 import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
 import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
+import DoctorNotificationsPage from "./pages/doctor/DoctorNotificationsPage";
 
 // Patient
 import PatientLayout from "./components/patient/PatientLayout";
@@ -40,7 +41,9 @@ function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) return <Navigate to="/login" replace />;
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   if (allowedRole && role !== allowedRole) {
     return <Navigate to={getDashboardRoute(role)} replace />;
@@ -62,7 +65,6 @@ export default function App() {
 
   return (
     <Routes>
-
       {/* ROOT */}
       <Route
         path="/"
@@ -103,6 +105,7 @@ export default function App() {
         <Route path="availability" element={<DoctorAvailabilityPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
         <Route path="appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="notifications" element={<DoctorNotificationsPage />} />
         <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
 
@@ -147,7 +150,6 @@ export default function App() {
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }

@@ -1,30 +1,9 @@
 import "./adminTransactions.css";
 
 const transactionData = [
-  {
-    id: 1,
-    patient: "Nethasa N",
-    amount: "Rs. 3,500.00",
-    method: "Card",
-    status: "Completed",
-    date: "16/04/2026"
-  },
-  {
-    id: 2,
-    patient: "Thumashi W",
-    amount: "Rs. 2,000.00",
-    method: "Cash",
-    status: "Completed",
-    date: "16/04/2026"
-  },
-  {
-    id: 3,
-    patient: "Suwani P",
-    amount: "Rs. 4,750.00",
-    method: "Card",
-    status: "Pending",
-    date: "15/04/2026"
-  }
+  { id: 1, patient: "Nethasa N", amount: "Rs. 3,500.00", method: "Card", status: "Completed", date: "16/04/2026" },
+  { id: 2, patient: "Thumashi W", amount: "Rs. 2,000.00", method: "Cash", status: "Completed", date: "16/04/2026" },
+  { id: 3, patient: "Suwani P", amount: "Rs. 4,750.00", method: "Card", status: "Pending", date: "15/04/2026" }
 ];
 
 export default function AdminTransactions() {
@@ -43,22 +22,17 @@ export default function AdminTransactions() {
           <h4>Total Transactions</h4>
           <h3>{transactionData.length}</h3>
         </div>
-
         <div className="transaction-summary-card">
           <h4>Total Amount</h4>
           <h3>Rs. {totalAmount.toLocaleString()}.00</h3>
         </div>
-
         <div className="transaction-summary-card">
           <h4>Completed Payments</h4>
           <h3>{transactionData.filter((t) => t.status === "Completed").length}</h3>
         </div>
-
         <div className="transaction-summary-card">
           <h4>Pending Payments</h4>
-          <h3 className="warning">
-            {transactionData.filter((t) => t.status === "Pending").length}
-          </h3>
+          <h3 className="warning">{transactionData.filter((t) => t.status === "Pending").length}</h3>
         </div>
       </div>
 
@@ -80,13 +54,7 @@ export default function AdminTransactions() {
                 <td>{item.amount}</td>
                 <td>{item.method}</td>
                 <td>
-                  <span
-                    className={
-                      item.status === "Completed"
-                        ? "payment-status completed"
-                        : "payment-status pending"
-                    }
-                  >
+                  <span className={item.status === "Completed" ? "payment-status completed" : "payment-status pending"}>
                     {item.status}
                   </span>
                 </td>

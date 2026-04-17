@@ -3,11 +3,11 @@ import axios from "axios";
 // ── Axios instances ───────────────────────────────────────────────────────────
 
 const appointmentAPI = axios.create({
-  baseURL: "http://localhost:5003/api",
+  baseURL: "http://localhost:5005/api",
 });
 
 const doctorAPI = axios.create({
-  baseURL: "http://localhost:5002/api",
+  baseURL: "http://localhost:5003/api",
 });
 
 // Attach JWT from localStorage to every outgoing request
@@ -60,48 +60,11 @@ export const markNotificationRead = (id) =>
 
 // ── Doctor Service ────────────────────────────────────────────────────────────
 
-/**
- * getDoctors — Fetches doctors from the Doctor Management Service.
- * Falls back to mock data if the service is unavailable.
- */
+/** getDoctors — Fetches doctors from the Doctor Management Service. */
 export const getDoctors = async () => {
-  try {
-    const res = await doctorAPI.get("/doctors");
-    return res;
-  } catch {
-    // Return mock data so the UI works independently
-    return {
-      data: [
-        {
-          _id: "DOC_001",
-          name: "Dr. Kavinda Silva",
-          specialty: "Cardiologist",
-          experience: "12 years",
-          rating: 4.9,
-          fee: 2500,
-          hospital: "National Hospital Colombo",
-        },
-        {
-          _id: "DOC_002",
-          name: "Dr. Nirmali Perera",
-          specialty: "Cardiologist",
-          experience: "8 years",
-          rating: 4.7,
-          fee: 2200,
-          hospital: "Asiri Medical Hospital",
-        },
-        {
-          _id: "DOC_003",
-          name: "Dr. Wasantha Jayasinghe",
-          specialty: "Dermatologist",
-          experience: "15 years",
-          rating: 4.8,
-          fee: 3000,
-          hospital: "Lanka Hospitals",
-        },
-      ],
-    };
-  }
+  const res = await doctorAPI.get("/doctors");
+  const doctors = res.data?.data || res.data || [];
+  return { data: doctors };
 };
 
 // ── Helper: decode patient ID from JWT ───────────────────────────────────────

@@ -1,18 +1,7 @@
-.admin-users-page h2 {
-  margin: 0;
-  color: #2c3e50;
-}
+.admin-users-page h2 { margin: 0; color: #2c3e50; }
+.admin-users-page p { margin: 6px 0 20px; color: #7f8c8d; }
 
-.admin-users-page p {
-  margin: 6px 0 20px;
-  color: #7f8c8d;
-}
-
-.users-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+.users-header { display: flex; justify-content: space-between; align-items: center; }
 
 .add-user-btn {
   background: #27ae60;
@@ -24,9 +13,7 @@
   font-weight: 600;
 }
 
-.users-toolbar {
-  margin-bottom: 20px;
-}
+.users-toolbar { margin-bottom: 20px; }
 
 .users-toolbar input {
   width: 320px;
@@ -36,11 +23,7 @@
   background: #ffffff;
 }
 
-.users-message {
-  margin-bottom: 16px;
-  color: #27ae60;
-  font-weight: 600;
-}
+.users-message { margin-bottom: 16px; color: #27ae60; font-weight: 600; }
 
 .users-table-card {
   background: #ffffff;
@@ -49,21 +32,12 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-.users-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.users-table { width: 100%; border-collapse: collapse; }
 
 .users-table th,
-.users-table td {
-  padding: 14px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
+.users-table td { padding: 14px; text-align: left; border-bottom: 1px solid #e0e0e0; }
 
-.users-table th {
-  background: #e8f8f5;
-}
+.users-table th { background: #e8f8f5; }
 
 .status {
   padding: 6px 12px;
@@ -72,25 +46,11 @@
   font-weight: 600;
 }
 
-.status.active {
-  background: #e8f8f5;
-  color: #27ae60;
-}
+.status.active,
+.status.verified { background: #e8f8f5; color: #27ae60; }
+.status.pending { background: #fff4e5; color: #f39c12; }
 
-.status.verified {
-  background: #e8f8f5;
-  color: #27ae60;
-}
-
-.status.pending {
-  background: #fff4e5;
-  color: #f39c12;
-}
-
-.user-actions {
-  display: flex;
-  gap: 10px;
-}
+.user-actions { display: flex; gap: 10px; }
 
 .icon-btn {
   border: none;
@@ -101,10 +61,5 @@
   font-size: 18px;
 }
 
-.icon-btn.delete {
-  color: #e74c3c;
-}
-
-.icon-btn.delete:hover {
-  background: #fdecea;
-}
+.icon-btn.delete { color: #e74c3c; }
+.icon-btn.delete:hover { background: #fdecea; }

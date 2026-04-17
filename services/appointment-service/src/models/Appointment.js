@@ -6,6 +6,10 @@ const appointmentSchema = new mongoose.Schema(
             type: String,
             required: [true, "Patient ID is required"],
         },
+        patientName: {
+            type: String,
+            default: "",
+        },
         doctorId: {
             type: String,
             required: [true, "Doctor ID is required"],

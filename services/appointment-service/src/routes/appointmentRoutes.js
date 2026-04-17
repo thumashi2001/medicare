@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     createAppointment,
     getPatientAppointments,
+    getDoctorAppointments,
     getAppointmentById,
     updateAppointmentStatus,
     deleteAppointment,
@@ -13,6 +14,9 @@ router.post("/", createAppointment);
 
 // GET    /api/appointments/patient/:id — All appointments for a patient
 router.get("/patient/:id", getPatientAppointments);
+
+// GET    /api/appointments/doctor/:id  — All appointments for a doctor
+router.get("/doctor/:id", getDoctorAppointments);
 
 // GET    /api/appointments/:id      — Single appointment by ID
 router.get("/:id", getAppointmentById);

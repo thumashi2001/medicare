@@ -10,10 +10,33 @@ const getHealth = (req, res) => {
     });
 };
 
+// Public — list all doctors for the patient booking page
+const getAllDoctors = async (req, res) => {
+    try {
+        const profiles = await DoctorProfile.find({});
+        const doctors = profiles.map((p) => ({
+            _id: p.userId,           // auth-service user ID — used as doctorId when booking
+            profileId: p._id,
+            name: p.name || "Dr. (name not set)",
+            specialty: p.specialization,
+            hospital: p.hospital,
+            experience: `${p.experience} years`,
+            fee: p.consultationFee,
+            bio: p.bio,
+            profileImage: p.profileImage,
+            rating: 4.5,             // placeholder until ratings are implemented
+        }));
+        res.status(200).json({ success: true, data: doctors });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to fetch doctors", error: error.message });
+    }
+};
+
 const createDoctorProfile = async (req, res) => {
     try {
         const userId = req.user.id;
         const {
+            name,
             specialization,
             hospital,
             experience,
@@ -41,6 +64,7 @@ const createDoctorProfile = async (req, res) => {
 
         const doctorProfile = await DoctorProfile.create({
             userId,
+            name,
             specialization,
             hospital,
             experience,
@@ -130,6 +154,33 @@ const createAvailability = async (req, res) => {
             return res.status(400).json({
                 success: false,
                 message: "dayOfWeek, startTime and endTime are required"
+            });
+        }
+
+        // Convert "HH:MM" to minutes for comparison
+        const toMins = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+        const newStart = toMins(startTime);
+        const newEnd   = toMins(endTime);
+
+        if (newEnd <= newStart) {
+            return res.status(400).json({
+                success: false,
+                message: "End time must be after start time"
+            });
+        }
+
+        // Check for overlap with existing slots on the same day
+        const existing = await Availability.find({ userId, dayOfWeek });
+        const overlapping = existing.find((s) => {
+            const exStart = toMins(s.startTime);
+            const exEnd   = toMins(s.endTime);
+            return newStart < exEnd && newEnd > exStart;
+        });
+
+        if (overlapping) {
+            return res.status(409).json({
+                success: false,
+                message: `This slot overlaps with an existing slot on ${dayOfWeek} (${overlapping.startTime} – ${overlapping.endTime})`
             });
         }
 
@@ -479,8 +530,24 @@ const rejectAppointment = async (req, res) => {
     }
 };
 
+// Public — get availability slots for a specific doctor (used by patient booking)
+const getDoctorAvailability = async (req, res) => {
+    try {
+        const { doctorId } = req.params;
+        const slots = await Availability.find({ userId: doctorId, isAvailable: true }).sort({
+            dayOfWeek: 1,
+            startTime: 1,
+        });
+        res.status(200).json({ success: true, data: slots });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Failed to fetch availability", error: error.message });
+    }
+};
+
 module.exports = {
     getHealth,
+    getAllDoctors,
+    getDoctorAvailability,
     createDoctorProfile,
     getMyDoctorProfile,
     updateMyDoctorProfile,
