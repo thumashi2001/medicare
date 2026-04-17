@@ -22,14 +22,17 @@ export default function AdminSystemOverview() {
           <h4>Total Patients</h4>
           <h3>{overview.totalPatients}</h3>
         </div>
+
         <div className="overview-card">
           <h4>Total Doctors</h4>
           <h3>{overview.totalDoctors}</h3>
         </div>
+
         <div className="overview-card">
           <h4>Verified Doctors</h4>
           <h3 className="success">{overview.verifiedDoctors}</h3>
         </div>
+
         <div className="overview-card">
           <h4>Pending Doctors</h4>
           <h3 className="warning">{overview.pendingDoctors}</h3>
@@ -38,18 +41,22 @@ export default function AdminSystemOverview() {
 
       <div className="overview-details-card">
         <h3>Service Health</h3>
+
         <div className="overview-row">
           <span>System Status</span>
           <strong className="success-text">{overview.systemStatus}</strong>
         </div>
+
         <div className="overview-row">
           <span>Database Status</span>
           <strong className="success-text">{overview.databaseStatus}</strong>
         </div>
+
         <div className="overview-row">
           <span>API Status</span>
           <strong className="success-text">{overview.apiStatus}</strong>
         </div>
+
         <div className="overview-row">
           <span>Last Backup</span>
           <strong>{overview.lastBackup}</strong>

@@ -27,8 +27,13 @@
   font-size: 32px;
 }
 
-.admin-logout-card h2 { color: #2c3e50; }
-.admin-logout-card p { color: #7f8c8d; }
+.admin-logout-card h2 {
+  color: #2c3e50;
+}
+
+.admin-logout-card p {
+  color: #7f8c8d;
+}
 
 .admin-logout-card button {
   margin-top: 18px;

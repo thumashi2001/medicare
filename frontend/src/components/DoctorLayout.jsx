@@ -10,13 +10,12 @@ export default function DoctorLayout() {
     navigate("/login");
   };
 
-  const navItems = [
+    const navItems = [
     { label: "Dashboard", to: "/doctor" },
     { label: "Profile", to: "/doctor/profile" },
     { label: "Availability", to: "/doctor/availability" },
     { label: "Prescriptions", to: "/doctor/prescriptions" },
     { label: "Appointments", to: "/doctor/appointments" },
-    { label: "Notifications", to: "/doctor/notifications" },
     { label: "Reports", to: "/doctor/reports" }
   ];
 
@@ -83,9 +82,19 @@ const styles = {
     justifyContent: "space-between",
     gap: "24px"
   },
-  logoWrap: { marginBottom: "28px" },
-  sidebarSubtext: { margin: "8px 0 0", color: "#6b7b8c", fontSize: "14px" },
-  nav: { display: "flex", flexDirection: "column", gap: "10px" },
+  logoWrap: {
+    marginBottom: "28px"
+  },
+  sidebarSubtext: {
+    margin: "8px 0 0",
+    color: "#6b7b8c",
+    fontSize: "14px"
+  },
+  nav: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "10px"
+  },
   navItem: {
     padding: "14px 16px",
     borderRadius: "14px",
@@ -108,13 +117,26 @@ const styles = {
     cursor: "pointer",
     fontWeight: "600"
   },
-  main: { display: "flex", flexDirection: "column" },
+  main: {
+    display: "flex",
+    flexDirection: "column"
+  },
   topbar: {
     background: "#ffffff",
     borderBottom: "1px solid #e8edf3",
     padding: "22px 28px"
   },
-  topbarTitle: { margin: 0, color: "#243445", fontSize: "28px" },
-  topbarText: { margin: "6px 0 0", color: "#6b7b8c", fontSize: "14px" },
-  content: { padding: "28px" }
+  topbarTitle: {
+    margin: 0,
+    color: "#243445",
+    fontSize: "28px"
+  },
+  topbarText: {
+    margin: "6px 0 0",
+    color: "#6b7b8c",
+    fontSize: "14px"
+  },
+  content: {
+    padding: "28px"
+  }
 };

@@ -11,11 +11,7 @@
   font-size: 14px;
 }
 
-.admin-message {
-  margin-bottom: 16px;
-  color: #e74c3c;
-  font-weight: 600;
-}
+/* ================= STATS ================= */
 
 .admin-stats-grid {
   display: grid;
@@ -51,15 +47,28 @@
   font-weight: 700;
 }
 
-.admin-stat-card .danger { color: #e74c3c; }
-.admin-stat-card .warning { color: #f39c12; }
-.admin-stat-card .blue { color: #3498db; }
+/* Color variations */
+.admin-stat-card .danger {
+  color: #e74c3c;
+}
+
+.admin-stat-card .warning {
+  color: #f39c12;
+}
+
+.admin-stat-card .blue {
+  color: #3498db;
+}
+
+/* ================= BOTTOM GRID ================= */
 
 .admin-dashboard-bottom {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 20px;
 }
+
+/* ================= PANELS ================= */
 
 .admin-panel {
   background: #ffffff;
@@ -81,12 +90,16 @@
   color: #2c3e50;
 }
 
+/* ================= ACTIVITY ================= */
+
 .activity-item {
   padding: 14px 0;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.activity-item:last-child { border-bottom: none; }
+.activity-item:last-child {
+  border-bottom: none;
+}
 
 .activity-item strong {
   color: #2c3e50;
@@ -98,6 +111,13 @@
   color: #7f8c8d;
   font-size: 13px;
 }
+
+.activity-item span {
+  font-size: 12px;
+  color: #95a5a6;
+}
+
+/* ================= QUICK ACTIONS ================= */
 
 .quick-actions button {
   display: block;
@@ -118,7 +138,14 @@
   transform: scale(1.02);
 }
 
+/* ================= RESPONSIVE ================= */
+
 @media (max-width: 1024px) {
-  .admin-stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .admin-dashboard-bottom { grid-template-columns: 1fr; }
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-dashboard-bottom {
+    grid-template-columns: 1fr;
+  }
 }

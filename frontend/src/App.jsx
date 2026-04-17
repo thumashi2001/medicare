@@ -103,7 +103,6 @@ export default function App() {
         <Route path="availability" element={<DoctorAvailabilityPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
         <Route path="appointments" element={<DoctorAppointmentsPage />} />
-        <Route path="notifications" element={<DoctorNotificationsPage />} />
         <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
 

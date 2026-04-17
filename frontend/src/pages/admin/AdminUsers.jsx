@@ -24,34 +24,47 @@ export default function AdminUsers() {
 
   const filteredUsers = useMemo(() => {
     const keyword = search.trim().toLowerCase();
+
     if (!keyword) return users;
+
     return users.filter((user) => {
       const name = (user.name || user.fullName || "").toLowerCase();
       const email = (user.email || "").toLowerCase();
       const role = (user.role || "").toLowerCase();
-      return name.includes(keyword) || email.includes(keyword) || role.includes(keyword);
+
+      return (
+        name.includes(keyword) ||
+        email.includes(keyword) ||
+        role.includes(keyword)
+      );
     });
   }, [users, search]);
 
   const handleDelete = async (id) => {
     const confirmed = window.confirm("Are you sure you want to delete this user?");
     if (!confirmed) return;
+
     try {
       await adminAPI.delete(`/users/${id}`);
       setMessage("User deleted successfully.");
       fetchUsers();
     } catch (error) {
+      console.error("Delete user error:", error);
       setMessage("Failed to delete user.");
     }
   };
 
   const getStatus = (user) => {
-    if (user.role === "doctor") return user.isVerified ? "Verified" : "Pending";
+    if (user.role === "doctor") {
+      return user.isVerified ? "Verified" : "Pending";
+    }
     return "Active";
   };
 
   const getStatusClass = (user) => {
-    if (user.role === "doctor") return user.isVerified ? "status verified" : "status pending";
+    if (user.role === "doctor") {
+      return user.isVerified ? "status verified" : "status pending";
+    }
     return "status active";
   };
 
@@ -62,7 +75,10 @@ export default function AdminUsers() {
           <h2>User Management</h2>
           <p>Manage patient and admin accounts</p>
         </div>
-        <button type="button" className="add-user-btn">+ Add User</button>
+
+        <button type="button" className="add-user-btn">
+          + Add User
+        </button>
       </div>
 
       <div className="users-toolbar">
@@ -87,6 +103,7 @@ export default function AdminUsers() {
               <th>Actions</th>
             </tr>
           </thead>
+
           <tbody>
             {filteredUsers.length > 0 ? (
               filteredUsers.map((user) => (
@@ -95,7 +112,9 @@ export default function AdminUsers() {
                   <td>{user.email}</td>
                   <td>{user.role}</td>
                   <td>
-                    <span className={getStatusClass(user)}>{getStatus(user)}</span>
+                    <span className={getStatusClass(user)}>
+                      {getStatus(user)}
+                    </span>
                   </td>
                   <td className="user-actions">
                     <button
@@ -111,7 +130,9 @@ export default function AdminUsers() {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>No users found</td>
+                <td colSpan="5" style={{ textAlign: "center" }}>
+                  No users found
+                </td>
               </tr>
             )}
           </tbody>

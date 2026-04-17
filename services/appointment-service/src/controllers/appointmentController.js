@@ -172,25 +172,9 @@ const deleteAppointment = async (req, res) => {
     }
 };
 
-// @desc  Get all appointments for a specific doctor
-// @route GET /api/appointments/doctor/:id
-const getDoctorAppointments = async (req, res) => {
-    try {
-        const appointments = await Appointment.find({
-            doctorId: req.params.id,
-        }).sort({ appointmentDate: -1 });
-
-        return res.status(200).json({ success: true, data: appointments });
-    } catch (error) {
-        console.error("getDoctorAppointments error:", error);
-        return res.status(500).json({ success: false, message: "Server error" });
-    }
-};
-
 module.exports = {
     createAppointment,
     getPatientAppointments,
-    getDoctorAppointments,
     getAppointmentById,
     updateAppointmentStatus,
     deleteAppointment,
