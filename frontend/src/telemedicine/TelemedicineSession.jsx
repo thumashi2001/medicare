@@ -74,7 +74,7 @@ const TelemedicineSession = () => {
         token ? (
           <LiveCall
             channelName={appointmentId}
-            onLeave={() => navigate("/appointments")}
+            onLeave={() => navigate("/telemedicine")}
             localCameraTrack={localCameraTrack}
             localMicrophoneTrack={localMicrophoneTrack}
             micOn={micOn}
