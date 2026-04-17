@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: admin-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: admin-service
+  template:
+    metadata:
+      labels:
+        app: admin-service
+    spec:
+      containers:
+        - name: admin-service
+          image: admin-service:latest
+          ports:
+            - containerPort: 5004
+          env:
+            - name: JWT_SECRET
+              value: "super_secret_key_123"
+            - name: PORT
+              value: "5004"
+            - name: AUTH_SERVICE_URL
+              value: "http://auth-service:5001"

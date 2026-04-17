@@ -5,6 +5,16 @@ import DoctorDashboard from "./pages/DoctorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import PaymentPage from "./pages/PaymentPage";
 
+import DoctorLayout from "./components/DoctorLayout";
+import DoctorHome from "./pages/doctor/DoctorHome";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
+import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
+import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
+import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
+import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
+import HomePage from "./pages/HomePage";
+
+
 import PatientLayout from "./components/patient/PatientLayout";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientProfile from "./pages/patient/PatientProfile";
@@ -16,6 +26,14 @@ import PatientLogout from "./pages/patient/PatientLogout";
 
 import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
 import NotificationsPanel from "./components/notifications/NotificationsPanel";
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDoctorVerification from "./pages/admin/AdminDoctorVerification";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
+import AdminLogout from "./pages/admin/AdminLogout";
+
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -36,6 +54,7 @@ function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
   if (role === "patient") return "/patient/dashboard";
   if (role === "admin") return "/admin";
+  if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
 
@@ -49,6 +68,11 @@ export default function App() {
         path="/"
         element={
           token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
+          token ? (
+            <Navigate to={getDashboardRoute(role)} replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
         }
       />
 
@@ -73,6 +97,17 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+            <DoctorLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<DoctorHome />} />
+        <Route path="profile" element={<DoctorProfilePage />} />
+        <Route path="availability" element={<DoctorAvailabilityPage />} />
+        <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
+        <Route path="appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="reports" element={<DoctorReportsPage />} />
+      </Route>
 
       <Route
         path="/admin"
@@ -82,6 +117,18 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="doctor-verification" element={<AdminDoctorVerification />} />
+        <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="system-overview" element={<AdminSystemOverview />} />
+        <Route path="logout" element={<AdminLogout />} />
+      </Route>
 
       <Route
         path="/patient"
