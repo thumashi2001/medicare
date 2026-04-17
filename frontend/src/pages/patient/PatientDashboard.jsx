@@ -1,38 +1,59 @@
 import { useEffect, useState } from "react";
 import API from "../../api/axios";
+import { getPatientAppointments, getPatientIdFromToken } from "../../services/appointmentApi";
 import "./patientDashboard.css";
 
-export default function PatientDashboard() {
-  const [stats, setStats] = useState({
-    upcoming: 1,
-    completed: 2,
-    reports: 0,
-    prescriptions: 0
+const formatDate = (dateStr) =>
+  new Date(dateStr).toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
   });
 
+export default function PatientDashboard() {
+  const [stats, setStats] = useState({ upcoming: 0, confirmed: 0, reports: 0, prescriptions: 0 });
+  const [nextAppointment, setNextAppointment] = useState(null);
   const [recentReports, setRecentReports] = useState([]);
   const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
-        const [profileRes, prescriptionsRes] = await Promise.all([
-          API.get("/patients/profile"),
-          API.get("/patients/prescriptions")
+        const patientId = getPatientIdFromToken();
+
+        const [profileRes, prescriptionsRes, apptRes] = await Promise.all([
+          API.get("/patients/profile").catch(() => ({ data: {} })),
+          API.get("/patients/prescriptions").catch(() => ({ data: [] })),
+          getPatientAppointments(patientId).catch(() => ({ data: { data: [] } })),
         ]);
 
         const profileData = profileRes.data || {};
         const reports = Array.isArray(profileData.reports) ? profileData.reports : [];
-        const prescriptions = Array.isArray(prescriptionsRes.data)
-          ? prescriptionsRes.data
-          : [];
+        const prescriptions = Array.isArray(prescriptionsRes.data) ? prescriptionsRes.data : [];
+        const appointments = apptRes.data?.data || [];
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const upcomingAppts = appointments.filter(
+          (a) =>
+            (a.status === "Pending" || a.status === "Confirmed") &&
+            new Date(a.appointmentDate) >= today
+        );
+
+        const confirmedCount = appointments.filter((a) => a.status === "Confirmed").length;
 
         setStats({
-          upcoming: 1,
-          completed: 2,
+          upcoming: upcomingAppts.length,
+          confirmed: confirmedCount,
           reports: reports.length,
-          prescriptions: prescriptions.length
+          prescriptions: prescriptions.length,
         });
+
+        const sorted = [...upcomingAppts].sort(
+          (a, b) => new Date(a.appointmentDate) - new Date(b.appointmentDate)
+        );
+        setNextAppointment(sorted[0] || null);
 
         const mappedReports = reports
           .slice(-3)
@@ -45,13 +66,13 @@ export default function PatientDashboard() {
               `Report ${index + 1}`,
             uploadedAt: report.uploadedAt
               ? new Date(report.uploadedAt).toLocaleDateString()
-              : "N/A"
+              : "N/A",
           }));
 
         setRecentReports(mappedReports);
       } catch (error) {
         console.error("Dashboard fetch error:", error);
-        setMessage("Could not load dashboard data from backend.");
+        setMessage("Could not load some dashboard data.");
       }
     };
 
@@ -74,8 +95,8 @@ export default function PatientDashboard() {
         </div>
 
         <div className="summary-card">
-          <h2 className="summary-green">{stats.completed}</h2>
-          <p>Completed</p>
+          <h2 className="summary-green">{stats.confirmed}</h2>
+          <p>Confirmed</p>
         </div>
 
         <div className="summary-card">
@@ -92,19 +113,40 @@ export default function PatientDashboard() {
       <div className="dashboard-section">
         <h3>Upcoming Appointment</h3>
 
-        <div className="appointment-card">
-          <div className="appointment-left">
-            <div className="doctor-avatar">D</div>
+        {nextAppointment ? (
+          <div className="appointment-card">
+            <div className="appointment-left">
+              <div className="doctor-avatar">
+                {nextAppointment.doctorName
+                  ?.split(" ")
+                  .filter((w) => w !== "Dr.")
+                  .map((w) => w[0])
+                  .slice(0, 1)
+                  .join("") || "D"}
+              </div>
 
-            <div className="appointment-info">
-              <h4>Dr. Kavinda Silva</h4>
-              <p>Cardiologist</p>
-              <span>Tomorrow • 10:30 AM</span>
+              <div className="appointment-info">
+                <h4>{nextAppointment.doctorName}</h4>
+                <p>{nextAppointment.doctorSpecialty}</p>
+                <span>
+                  {formatDate(nextAppointment.appointmentDate)} &bull;{" "}
+                  {nextAppointment.appointmentTime}
+                </span>
+              </div>
             </div>
-          </div>
 
-          <button type="button">View Details</button>
-        </div>
+            <button
+              type="button"
+              onClick={() => (window.location.href = "/patient/appointments")}
+            >
+              View Details
+            </button>
+          </div>
+        ) : (
+          <div className="empty-state">
+            <p>No upcoming appointments.</p>
+          </div>
+        )}
       </div>
 
       <div className="dashboard-section">

@@ -11,13 +11,23 @@ const StarRating = ({ rating }) => (
   </span>
 );
 
-const DoctorAvatar = ({ name }) => {
+const DoctorAvatar = ({ name, profileImage }) => {
   const initials = name
     .split(" ")
     .filter((w) => w !== "Dr.")
     .map((w) => w[0])
     .slice(0, 2)
     .join("");
+  if (profileImage) {
+    return (
+      <img
+        src={profileImage}
+        alt={name}
+        onError={(e) => { e.currentTarget.style.display = "none"; e.currentTarget.nextSibling.style.display = "flex"; }}
+        className="w-16 h-16 rounded-full object-cover flex-shrink-0"
+      />
+    );
+  }
   return (
     <div className="w-16 h-16 rounded-full flex items-center justify-center text-white text-xl font-bold bg-green-dark flex-shrink-0">
       {initials}
@@ -125,7 +135,7 @@ export default function FindDoctorsPage() {
             >
               {/* Top Section */}
               <div className="flex items-start gap-4">
-                <DoctorAvatar name={doctor.name} />
+                <DoctorAvatar name={doctor.name} profileImage={doctor.profileImage} />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-gray-800 truncate">{doctor.name}</h3>
                   <span className="inline-block text-xs font-medium bg-green-light text-green-dark px-2 py-0.5 rounded-full mt-0.5">

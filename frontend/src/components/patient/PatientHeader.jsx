@@ -1,8 +1,18 @@
 import { useEffect, useState } from "react";
 import API from "../../api/axios";
 
+const getNameFromToken = () => {
+  try {
+    const token = localStorage.getItem("token");
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    return payload.name || "Patient";
+  } catch {
+    return localStorage.getItem("name") || "Patient";
+  }
+};
+
 export default function PatientHeader() {
-  const [name, setName] = useState(localStorage.getItem("name") || "Patient");
+  const [name, setName] = useState(getNameFromToken);
   const [profileImage, setProfileImage] = useState("");
 
   useEffect(() => {
@@ -19,8 +29,8 @@ export default function PatientHeader() {
         if (data.profileImage) {
           setProfileImage(data.profileImage);
         }
-      } catch (error) {
-        console.error("Header profile fetch error:", error);
+      } catch {
+        // silently fall back to JWT name
       }
     };
 
@@ -29,10 +39,8 @@ export default function PatientHeader() {
 
   const getProfileImageUrl = () => {
     if (!profileImage) return "";
-
     const normalizedPath = profileImage.replaceAll("\\", "/");
     const cleanPath = normalizedPath.replace(/^uploads\//, "");
-
     return `http://localhost:5002/uploads/${cleanPath}`;
   };
 
