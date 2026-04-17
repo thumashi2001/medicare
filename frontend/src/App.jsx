@@ -1,20 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import DoctorDashboard from "./pages/DoctorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import PaymentPage from "./pages/PaymentPage";
 
-import DoctorLayout from "./components/DoctorLayout";
-import DoctorHome from "./pages/doctor/DoctorHome";
-import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
-import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
-import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
-import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
-import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
-import HomePage from "./pages/HomePage";
-
-
+// Patient
 import PatientLayout from "./components/patient/PatientLayout";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientProfile from "./pages/patient/PatientProfile";
@@ -23,9 +12,20 @@ import PatientReports from "./pages/patient/PatientReports";
 import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHistory from "./pages/patient/PatientHistory";
 import PatientLogout from "./pages/patient/PatientLogout";
-
 import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
 import NotificationsPanel from "./components/notifications/NotificationsPanel";
+
+// Doctor
+import DoctorLayout from "./components/DoctorLayout";
+import DoctorHome from "./pages/doctor/DoctorHome";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
+import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
+import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
+import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
+import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
+import DoctorNotificationsPage from "./pages/doctor/DoctorNotificationsPage";
+
+// Admin
 import AdminLayout from "./components/admin/AdminLayout";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUsers from "./pages/admin/AdminUsers";
@@ -33,7 +33,6 @@ import AdminDoctorVerification from "./pages/admin/AdminDoctorVerification";
 import AdminTransactions from "./pages/admin/AdminTransactions";
 import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
 import AdminLogout from "./pages/admin/AdminLogout";
-
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -54,7 +53,6 @@ function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
   if (role === "patient") return "/patient/dashboard";
   if (role === "admin") return "/admin";
-  if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
 
@@ -68,11 +66,6 @@ export default function App() {
         path="/"
         element={
           token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
-          token ? (
-            <Navigate to={getDashboardRoute(role)} replace />
-          ) : (
-            <Navigate to="/login" replace />
-          )
         }
       />
 
@@ -93,10 +86,6 @@ export default function App() {
         path="/doctor"
         element={
           <ProtectedRoute allowedRole="doctor">
-            <DoctorDashboard />
-          </ProtectedRoute>
-        }
-      />
             <DoctorLayout />
           </ProtectedRoute>
         }
@@ -106,6 +95,7 @@ export default function App() {
         <Route path="availability" element={<DoctorAvailabilityPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
         <Route path="appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="notifications" element={<DoctorNotificationsPage />} />
         <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
 
@@ -113,10 +103,6 @@ export default function App() {
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminDashboard />
-          </ProtectedRoute>
-        }
-      />
             <AdminLayout />
           </ProtectedRoute>
         }

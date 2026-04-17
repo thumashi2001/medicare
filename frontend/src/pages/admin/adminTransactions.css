@@ -1,12 +1,5 @@
-.admin-transactions-page h2 {
-  margin: 0;
-  color: #2c3e50;
-}
-
-.admin-transactions-page p {
-  margin: 6px 0 20px;
-  color: #7f8c8d;
-}
+.admin-transactions-page h2 { margin: 0; color: #2c3e50; }
+.admin-transactions-page p { margin: 6px 0 20px; color: #7f8c8d; }
 
 .transaction-summary-grid {
   display: grid;
@@ -22,21 +15,9 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-.transaction-summary-card h4 {
-  margin: 0 0 10px;
-  color: #7f8c8d;
-  font-size: 14px;
-}
-
-.transaction-summary-card h3 {
-  margin: 0;
-  color: #27ae60;
-  font-size: 28px;
-}
-
-.transaction-summary-card .warning {
-  color: #f39c12;
-}
+.transaction-summary-card h4 { margin: 0 0 10px; color: #7f8c8d; font-size: 14px; }
+.transaction-summary-card h3 { margin: 0; color: #27ae60; font-size: 28px; }
+.transaction-summary-card .warning { color: #f39c12; }
 
 .transactions-table-card {
   background: #ffffff;
@@ -45,22 +26,12 @@
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
 }
 
-.transactions-table {
-  width: 100%;
-  border-collapse: collapse;
-}
+.transactions-table { width: 100%; border-collapse: collapse; }
 
 .transactions-table th,
-.transactions-table td {
-  padding: 14px;
-  text-align: left;
-  border-bottom: 1px solid #e0e0e0;
-}
+.transactions-table td { padding: 14px; text-align: left; border-bottom: 1px solid #e0e0e0; }
 
-.transactions-table th {
-  background: #e8f8f5;
-  color: #2c3e50;
-}
+.transactions-table th { background: #e8f8f5; color: #2c3e50; }
 
 .payment-status {
   padding: 6px 12px;
@@ -69,12 +40,5 @@
   font-weight: 600;
 }
 
-.payment-status.completed {
-  background: #e8f8f5;
-  color: #27ae60;
-}
-
-.payment-status.pending {
-  background: #fff4e5;
-  color: #f39c12;
-}
+.payment-status.completed { background: #e8f8f5; color: #27ae60; }
+.payment-status.pending { background: #fff4e5; color: #f39c12; }

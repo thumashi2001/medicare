@@ -94,24 +94,15 @@ export default function AdminDashboard() {
         <div className="admin-panel quick-actions">
           <h3>Quick Actions</h3>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/users")}
-          >
+          <button type="button" onClick={() => navigate("/admin/users")}>
             Manage Users
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/doctor-verification")}
-          >
+          <button type="button" onClick={() => navigate("/admin/doctor-verification")}>
             Verify Doctors
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate("/admin/transactions")}
-          >
+          <button type="button" onClick={() => navigate("/admin/transactions")}>
             View Transactions
           </button>
         </div>

@@ -26,7 +26,6 @@ export default function AdminDoctorVerification() {
       setMessage("Doctor verified successfully.");
       fetchPendingDoctors();
     } catch (error) {
-      console.error("Verify doctor error:", error);
       setMessage("Failed to verify doctor.");
     }
   };
@@ -37,7 +36,6 @@ export default function AdminDoctorVerification() {
       setMessage("Doctor rejected successfully.");
       fetchPendingDoctors();
     } catch (error) {
-      console.error("Reject doctor error:", error);
       setMessage("Failed to reject doctor.");
     }
   };
@@ -67,26 +65,13 @@ export default function AdminDoctorVerification() {
                 <tr key={doctor._id}>
                   <td>{doctor.name || doctor.fullName || "N/A"}</td>
                   <td>{doctor.specialty || "General"}</td>
-                  <td>
-                    {doctor.createdAt
-                      ? new Date(doctor.createdAt).toLocaleDateString()
-                      : "N/A"}
-                  </td>
+                  <td>{doctor.createdAt ? new Date(doctor.createdAt).toLocaleDateString() : "N/A"}</td>
                   <td>{doctor.documentsCount || "N/A"}</td>
                   <td className="doctor-actions">
-                    <button
-                      className="verify-btn"
-                      type="button"
-                      onClick={() => handleVerify(doctor._id)}
-                    >
+                    <button className="verify-btn" type="button" onClick={() => handleVerify(doctor._id)}>
                       Verify
                     </button>
-
-                    <button
-                      className="reject-btn"
-                      type="button"
-                      onClick={() => handleReject(doctor._id)}
-                    >
+                    <button className="reject-btn" type="button" onClick={() => handleReject(doctor._id)}>
                       Reject
                     </button>
                   </td>
@@ -94,9 +79,7 @@ export default function AdminDoctorVerification() {
               ))
             ) : (
               <tr>
-                <td colSpan="5" style={{ textAlign: "center" }}>
-                  No pending doctors
-                </td>
+                <td colSpan="5" style={{ textAlign: "center" }}>No pending doctors</td>
               </tr>
             )}
           </tbody>
