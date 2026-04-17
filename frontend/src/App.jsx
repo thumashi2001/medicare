@@ -1,10 +1,9 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
-import DoctorDashboard from "./pages/DoctorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import PaymentPage from "./pages/PaymentPage";
 
+// Patient
 import PatientLayout from "./components/patient/PatientLayout";
 import PatientDashboard from "./pages/patient/PatientDashboard";
 import PatientProfile from "./pages/patient/PatientProfile";
@@ -13,9 +12,27 @@ import PatientReports from "./pages/patient/PatientReports";
 import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHistory from "./pages/patient/PatientHistory";
 import PatientLogout from "./pages/patient/PatientLogout";
-
 import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
 import NotificationsPanel from "./components/notifications/NotificationsPanel";
+
+// Doctor
+import DoctorLayout from "./components/DoctorLayout";
+import DoctorHome from "./pages/doctor/DoctorHome";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
+import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
+import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
+import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
+import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
+import DoctorNotificationsPage from "./pages/doctor/DoctorNotificationsPage";
+
+// Admin
+import AdminLayout from "./components/admin/AdminLayout";
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminUsers from "./pages/admin/AdminUsers";
+import AdminDoctorVerification from "./pages/admin/AdminDoctorVerification";
+import AdminTransactions from "./pages/admin/AdminTransactions";
+import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
+import AdminLogout from "./pages/admin/AdminLogout";
 
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
@@ -69,19 +86,35 @@ export default function App() {
         path="/doctor"
         element={
           <ProtectedRoute allowedRole="doctor">
-            <DoctorDashboard />
+            <DoctorLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<DoctorHome />} />
+        <Route path="profile" element={<DoctorProfilePage />} />
+        <Route path="availability" element={<DoctorAvailabilityPage />} />
+        <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
+        <Route path="appointments" element={<DoctorAppointmentsPage />} />
+        <Route path="notifications" element={<DoctorNotificationsPage />} />
+        <Route path="reports" element={<DoctorReportsPage />} />
+      </Route>
 
       <Route
         path="/admin"
         element={
           <ProtectedRoute allowedRole="admin">
-            <AdminDashboard />
+            <AdminLayout />
           </ProtectedRoute>
         }
-      />
+      >
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<AdminDashboard />} />
+        <Route path="users" element={<AdminUsers />} />
+        <Route path="doctor-verification" element={<AdminDoctorVerification />} />
+        <Route path="transactions" element={<AdminTransactions />} />
+        <Route path="system-overview" element={<AdminSystemOverview />} />
+        <Route path="logout" element={<AdminLogout />} />
+      </Route>
 
       <Route
         path="/patient"

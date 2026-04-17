@@ -35,7 +35,6 @@ __tests__
 # Docker files themselves (not needed inside the image)
 Dockerfile
 .dockerignore
-nginx.conf
 
 # CI / misc
 .github

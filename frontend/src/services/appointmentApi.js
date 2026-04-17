@@ -3,7 +3,7 @@ import axios from "axios";
 // ── Axios instances ───────────────────────────────────────────────────────────
 
 const appointmentAPI = axios.create({
-  baseURL: "http://localhost:5003/api",
+  baseURL: "http://localhost:5005/api",
 });
 
 const doctorAPI = axios.create({
