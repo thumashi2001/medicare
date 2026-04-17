@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // Added for internal navigation
 import axios from "axios";
 
 const DOCTOR_API = "http://localhost:5003";
-const TELEMEDICINE_BASE_URL = "http://localhost:5174";
 
 export default function DoctorAppointmentsPage() {
   const token = localStorage.getItem("token");
+  const navigate = useNavigate(); // Initialize navigation hook
 
   const [appointments, setAppointments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -70,9 +71,9 @@ export default function DoctorAppointmentsPage() {
     }
   };
 
+  // Updated to use React Router navigation instead of window.open
   const joinConsultation = (appointmentId) => {
-    const consultationUrl = `${TELEMEDICINE_BASE_URL}/video-room/${appointmentId}`;
-    window.open(consultationUrl, "_blank");
+    navigate(`/video-room/${appointmentId}`);
   };
 
   return (

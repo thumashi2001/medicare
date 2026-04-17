@@ -36,6 +36,9 @@ import AdminLogout from "./pages/admin/AdminLogout";
 import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
 import NotificationsPanel from "./components/notifications/NotificationsPanel";
 
+//Telemedicine
+import TelemedicineSession from "./telemedicine/TelemedicineSession";
+
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
@@ -62,7 +65,6 @@ export default function App() {
 
   return (
     <Routes>
-
       {/* ROOT */}
       <Route
         path="/"
@@ -103,8 +105,18 @@ export default function App() {
         <Route path="availability" element={<DoctorAvailabilityPage />} />
         <Route path="prescriptions" element={<DoctorPrescriptionsPage />} />
         <Route path="appointments" element={<DoctorAppointmentsPage />} />
+
         <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
+
+      <Route
+        path="/video-room/:appointmentId"
+        element={
+          <ProtectedRoute allowedRole="doctor">
+            <TelemedicineSession />
+          </ProtectedRoute>
+        }
+      />
 
       {/* ADMIN */}
       <Route
@@ -118,7 +130,10 @@ export default function App() {
         <Route index element={<Navigate to="dashboard" replace />} />
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="users" element={<AdminUsers />} />
-        <Route path="doctor-verification" element={<AdminDoctorVerification />} />
+        <Route
+          path="doctor-verification"
+          element={<AdminDoctorVerification />}
+        />
         <Route path="transactions" element={<AdminTransactions />} />
         <Route path="system-overview" element={<AdminSystemOverview />} />
         <Route path="logout" element={<AdminLogout />} />
@@ -147,7 +162,6 @@ export default function App() {
 
       {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
-
     </Routes>
   );
 }
