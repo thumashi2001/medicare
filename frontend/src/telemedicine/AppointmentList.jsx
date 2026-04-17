@@ -1,47 +1,108 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 const AppointmentList = () => {
   const navigate = useNavigate();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data
-  const myAppointments = [
-    { id: "APP-9987", doctor: "Dr. Kamal Perera", time: "10:30 AM" },
-    { id: "APP-5542", doctor: "Dr. Sarah Silva", time: "02:15 PM" },
-  ];
+  // Fetch real data from your Payment Table
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        // Calling your existing admin/history route
+        const { data } = await axios.get("http://localhost:5007/api/payments/admin/history");
+        setAppointments(data);
+        setLoading(false);
+      } catch (err) {
+        console.error("Error fetching from payment service:", err);
+        setLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, []);
+
+  if (loading) return <div style={{ padding: "20px" }}>Loading Appointments...</div>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h2>My Appointments</h2>
-      {myAppointments.map((appt) => (
-        <div
-          key={appt.id}
-          style={{
-            border: "1px solid #ccc",
-            margin: "10px",
-            padding: "15px",
-            borderRadius: "8px",
-          }}
-        >
-          <h4>{appt.doctor}</h4>
-          <p>
-            ID: {appt.id} | Time: {appt.time}
-          </p>
-          <button
-            onClick={() => navigate(`/video-room/${appt.id}`)}
+    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+      <h2 style={{ borderBottom: "2px solid #2ecc71", paddingBottom: "10px" }}>
+        Consultation History & Access
+      </h2>
+
+      {appointments.length === 0 ? (
+        <p>No appointments found in the system.</p>
+      ) : (
+        appointments.map((appt) => (
+          <div
+            key={appt._id}
             style={{
-              backgroundColor: "#28a745",
-              color: "white",
-              border: "none",
-              padding: "10px",
-              borderRadius: "5px",
-              cursor: "pointer",
+              border: "1px solid #ddd",
+              margin: "15px 0",
+              padding: "20px",
+              borderRadius: "12px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              backgroundColor: appt.status === "SUCCESS" ? "#fafffb" : "#fff",
             }}
           >
-            Join Video Call
-          </button>
-        </div>
-      ))}
+            <div>
+              <h4 style={{ margin: "0 0 5px 0" }}>Patient: {appt.patientUsername}</h4>
+              <p style={{ margin: 0, fontSize: "0.9rem", color: "#666" }}>
+                ID: <strong>{appt.appointmentId}</strong> | 
+                Amount: {appt.currency} {appt.amount}
+              </p>
+              <div style={{ marginTop: "5px" }}>
+                <span style={{
+                  fontSize: "0.75rem",
+                  padding: "3px 8px",
+                  borderRadius: "4px",
+                  fontWeight: "bold",
+                  backgroundColor: appt.status === "SUCCESS" ? "#2ecc71" : "#f1c40f",
+                  color: "white"
+                }}>
+                  {appt.status}
+                </span>
+              </div>
+            </div>
+
+            <div>
+              {appt.status === "SUCCESS" ? (
+                <button
+                  onClick={() => navigate(`/video-room/${appt.appointmentId}`)}
+                  style={{
+                    backgroundColor: "#2ecc71",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 15px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    fontWeight: "bold"
+                  }}
+                >
+                  Join Video Session
+                </button>
+              ) : (
+                <button
+                  onClick={() => navigate(`/pay/${appt.appointmentId}`)}
+                  style={{
+                    backgroundColor: "#3498db",
+                    color: "white",
+                    border: "none",
+                    padding: "10px 15px",
+                    borderRadius: "6px",
+                    cursor: "pointer"
+                  }}
+                >
+                  Complete Payment
+                </button>
+              )}
+            </div>
+          </div>
+        ))
+      )}
     </div>
   );
 };
