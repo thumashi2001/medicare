@@ -1,11 +1,6 @@
-@import "tailwindcss";
-
-@theme {
-  --color-green-primary: #2ECC71;
-  --color-green-dark: #27AE60;
-  --color-green-light: #E8F8F5;
-  --color-blue-secondary: #3498DB;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 * {
   box-sizing: border-box;

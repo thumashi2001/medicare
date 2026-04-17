@@ -2,6 +2,16 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import PaymentPage from "./pages/PaymentPage";
+import HomePage from "./pages/HomePage";
+
+// Doctor
+import DoctorLayout from "./components/DoctorLayout";
+import DoctorHome from "./pages/doctor/DoctorHome";
+import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
+import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
+import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
+import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
+import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
 
 // Patient
 import PatientLayout from "./components/patient/PatientLayout";
@@ -12,18 +22,6 @@ import PatientReports from "./pages/patient/PatientReports";
 import PatientPrescriptions from "./pages/patient/PatientPrescriptions";
 import PatientHistory from "./pages/patient/PatientHistory";
 import PatientLogout from "./pages/patient/PatientLogout";
-import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
-import NotificationsPanel from "./components/notifications/NotificationsPanel";
-
-// Doctor
-import DoctorLayout from "./components/DoctorLayout";
-import DoctorHome from "./pages/doctor/DoctorHome";
-import DoctorProfilePage from "./pages/doctor/DoctorProfilePage";
-import DoctorAvailabilityPage from "./pages/doctor/DoctorAvailabilityPage";
-import DoctorPrescriptionsPage from "./pages/doctor/DoctorPrescriptionsPage";
-import DoctorAppointmentsPage from "./pages/doctor/DoctorAppointmentsPage";
-import DoctorReportsPage from "./pages/doctor/DoctorReportsPage";
-import DoctorNotificationsPage from "./pages/doctor/DoctorNotificationsPage";
 
 // Admin
 import AdminLayout from "./components/admin/AdminLayout";
@@ -34,13 +32,15 @@ import AdminTransactions from "./pages/admin/AdminTransactions";
 import AdminSystemOverview from "./pages/admin/AdminSystemOverview";
 import AdminLogout from "./pages/admin/AdminLogout";
 
+// Others
+import FindDoctorsPage from "./components/appointments/FindDoctorsPage";
+import NotificationsPanel from "./components/notifications/NotificationsPanel";
+
 function ProtectedRoute({ children, allowedRole }) {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!token) return <Navigate to="/login" replace />;
 
   if (allowedRole && role !== allowedRole) {
     return <Navigate to={getDashboardRoute(role)} replace />;
@@ -52,7 +52,7 @@ function ProtectedRoute({ children, allowedRole }) {
 function getDashboardRoute(role) {
   if (role === "doctor") return "/doctor";
   if (role === "patient") return "/patient/dashboard";
-  if (role === "admin") return "/admin";
+  if (role === "admin") return "/admin/dashboard";
   return "/login";
 }
 
@@ -62,17 +62,24 @@ export default function App() {
 
   return (
     <Routes>
+
+      {/* ROOT */}
       <Route
         path="/"
         element={
-          token ? <Navigate to={getDashboardRoute(role)} replace /> : <Navigate to="/login" replace />
+          token ? (
+            <Navigate to={getDashboardRoute(role)} replace />
+          ) : (
+            <HomePage />
+          )
         }
       />
 
+      {/* AUTH */}
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
 
-      {/* Payment page — accessible outside the patient layout */}
+      {/* PAYMENT */}
       <Route
         path="/payment"
         element={
@@ -82,6 +89,7 @@ export default function App() {
         }
       />
 
+      {/* DOCTOR */}
       <Route
         path="/doctor"
         element={
@@ -99,6 +107,7 @@ export default function App() {
         <Route path="reports" element={<DoctorReportsPage />} />
       </Route>
 
+      {/* ADMIN */}
       <Route
         path="/admin"
         element={
@@ -116,6 +125,7 @@ export default function App() {
         <Route path="logout" element={<AdminLogout />} />
       </Route>
 
+      {/* PATIENT */}
       <Route
         path="/patient"
         element={
@@ -136,7 +146,9 @@ export default function App() {
         <Route path="logout" element={<PatientLogout />} />
       </Route>
 
+      {/* FALLBACK */}
       <Route path="*" element={<Navigate to="/" replace />} />
+
     </Routes>
   );
 }
