@@ -1,0 +1,65 @@
+.history-page h2 {
+  margin: 0;
+  color: #2c3e50;
+}
+
+.page-subtitle {
+  margin: 6px 0 24px;
+  color: #7f8c8d;
+}
+
+.history-tabs {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.history-tabs button {
+  background: transparent;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.history-tabs .active {
+  background: #e8f8f5;
+  color: #27ae60;
+  font-weight: 600;
+}
+
+.history-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.history-info-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.history-info-card span {
+  display: block;
+  color: #7f8c8d;
+  margin-bottom: 8px;
+}
+
+.history-info-card strong {
+  color: #2c3e50;
+}
+
+.history-section {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 18px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+}
+
+.history-section h3 {
+  margin-top: 0;
+}
