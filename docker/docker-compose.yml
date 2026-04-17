@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  # 1. Payment Service
+  payment-service:
+    build:
+      context: ../services/payment-service
+      dockerfile: Dockerfile
+    ports:
+      - "5007:5007"
+    env_file:
+      - ../services/payment-service/.env
+    networks:
+      - medicare-network
+
+  # 2. Telemedicine Service
+  telemedicine-service:
+    build:
+      context: ../services/telemedicine-service
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    env_file:
+      - ../services/telemedicine-service/.env
+    networks:
+      - medicare-network
+
+  # 3. Frontend Application
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80" # Maps local 5173 to Nginx port 80
+    depends_on:
+      - payment-service
+      - telemedicine-service
+    networks:
+      - medicare-network
+
+# Define a shared network so services can talk to each other by name
+networks:
+  medicare-network:
+    driver: bridge
